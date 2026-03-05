@@ -1,69 +1,119 @@
 """
 parser_logic.py
-Convierte horas del sitio (CET, UTC+1) a hora Colombia (UTC-5, -6h).
+La hora en pronosticosfutbol365.com está en un elemento HERMANO
+del div.match (no dentro). Estrategia:
+  1. Buscar .time dentro del match
+  2. Si no, buscar en el hermano anterior
+  3. Si no, buscar en el padre
+  4. Si no, regex HH:MM en todo el texto del bloque
+Convierte CET (UTC+1) → Colombia (UTC-5) = -6h
 """
 
 import re
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup, NavigableString, Tag
 from typing import Any
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
+
+SITE_UTC_OFFSET = +1   # CET
+COL_UTC_OFFSET  = -5   # America/Bogota
+HOUR_DIFF       = COL_UTC_OFFSET - SITE_UTC_OFFSET   # -6
 
 
-# ── Zona horaria ─────────────────────────────────────────────
-# El sitio pronosticosfutbol365.com usa CET (UTC+1)
-# Colombia = UTC-5 → diferencia: -6 horas
-
-SITE_UTC_OFFSET  = +1   # CET
-COL_UTC_OFFSET   = -5   # America/Bogota
-HOUR_DIFF        = COL_UTC_OFFSET - SITE_UTC_OFFSET  # = -6
-
-
-def _to_colombia_time(hora_str: str) -> str:
-    """
-    Convierte 'HH:MM' del sitio (CET/UTC+1) a hora Colombia (UTC-5).
-    Si falla el parseo, devuelve el original sin modificar.
-    Ejemplos:
-      '16:10' CET → '10:10' COL
-      '00:30' CET → '18:30' COL (día anterior)
-    """
-    hora_str = hora_str.strip()
-    m = re.match(r"^(\d{1,2}):(\d{2})$", hora_str)
+def _to_col(hora_str: str) -> str:
+    """'HH:MM' CET → 'HH:MM' Colombia."""
+    m = re.match(r"^(\d{1,2}):(\d{2})$", hora_str.strip())
     if not m:
-        return hora_str  # no es HH:MM puro, devolver tal cual
-
-    h = int(m.group(1))
-    mins = int(m.group(2))
-    total_mins = h * 60 + mins + HOUR_DIFF * 60
-
-    # Manejar cambio de día
-    total_mins = total_mins % (24 * 60)
-    if total_mins < 0:
-        total_mins += 24 * 60
-
-    new_h   = total_mins // 60
-    new_min = total_mins % 60
-    return f"{new_h:02d}:{new_min:02d}"
+        return hora_str
+    total = int(m.group(1)) * 60 + int(m.group(2)) + HOUR_DIFF * 60
+    total = total % (24 * 60)
+    if total < 0:
+        total += 24 * 60
+    return f"{total // 60:02d}:{total % 60:02d}"
 
 
 def _txt(node: Any) -> str:
     return node.get_text(" ", strip=True) if node else ""
 
 
-def _numbers_from_coefrow(coefrow: Tag) -> list[int]:
+def _find_time_in(node: Tag) -> str:
+    """Busca patrón HH:MM en cualquier elemento dentro de node."""
+    # Selectores específicos primero
+    for sel in [".time", ".hora", ".match-time", ".kickoff",
+                "[class*='time']", "[class*='hour']", "[class*='hora']"]:
+        el = node.select_one(sel)
+        if el:
+            raw = re.sub(r"\s+", "", _txt(el))
+            m = re.match(r"(\d{1,2}:\d{2})", raw)
+            if m:
+                return m.group(1)
+
+    # Regex sobre todo el texto del nodo
+    full = _txt(node)
+    m = re.search(r"\b(\d{1,2}:\d{2})\b", full)
+    if m:
+        return m.group(1)
+    return ""
+
+
+def _extract_hora(match: Tag) -> str:
+    """
+    La hora está en div.date, ofuscada con un span display:none:
+      <div class="date">
+        22
+        <span style="display:none">:</span>
+        :00
+      </div>
+    BeautifulSoup lee "22 : :00" → hay que eliminar el span y limpiar.
+    Resultado: "22:00" CET → "16:00 COL"
+    """
+    import copy
+    date_div = match.select_one(".date")
+    if date_div:
+        d = copy.copy(date_div)
+        for hidden in d.find_all("span"):
+            style = (hidden.get("style") or "").replace(" ", "")
+            if "display:none" in style:
+                hidden.decompose()
+        raw = re.sub(r"\s+", "", d.get_text())  # "22:00" o "22::00"
+        raw = re.sub(r":+", ":", raw)            # "22::00" → "22:00"
+        m = re.match(r"(\d{1,2}:\d{2})", raw)
+        if m:
+            return f"{_to_col(m.group(1))} COL"
+    return ""
+
+
+def _scraped_at_to_col(scraped_at: str) -> str:
+    """Convierte scraped_at UTC ISO → hora Colombia (UTC-5)."""
+    try:
+        from datetime import timedelta
+        dt = datetime.fromisoformat(scraped_at)
+        col = dt.astimezone(timezone(timedelta(hours=-5)))
+        return f"{col.strftime('%H:%M')} COL"
+    except Exception:
+        return ""
+
+
+def _to_int(text: str) -> int | None:
+    t = text.strip()
+    if re.fullmatch(r"\d{1,3}", t):
+        return int(t)
+    return None
+
+
+def _coefrow_values(coefrow: Tag) -> list[int]:
     values: list[int] = []
     for child in coefrow.children:
         if not isinstance(child, Tag):
             continue
-        classes = child.get("class") or []
+        classes = child.get("class", [])
         if "ownheader" in classes:
             continue
         if "coefbox" in classes:
-            raw = child.get_text(" ", strip=True)
-            m = re.search(r"\b(\d{1,3})\b", raw)
-            if m:
-                n = int(m.group(1))
-                if 10 <= n <= 100:
-                    values.append(n)
+            value_node = child.find(class_=re.compile(r"\bvalue\b"))
+            raw = _txt(value_node) if value_node else _txt(child)
+            n = _to_int(raw)
+            if n is not None:
+                values.append(n)
     return values
 
 
@@ -75,23 +125,17 @@ _LABELS = [
 ]
 
 
-def _get_metrics(block: Tag) -> dict[str, int]:
+def _metrics_from_block(block: Tag) -> dict[str, int]:
     metrics = {k: 0 for k in _LABELS}
     inforow = block.select_one(".inforow")
     if not inforow:
         return metrics
-
-    for coefrow in inforow.select(".coefrow"):
-        vals = _numbers_from_coefrow(coefrow)
-        if len(vals) >= 3:
-            for i, v in enumerate(vals[:len(_LABELS)]):
-                metrics[_LABELS[i]] = v
+    for cr in inforow.select(".coefrow"):
+        v = _coefrow_values(cr)
+        if len(v) >= 3:
+            for i, val in enumerate(v[:len(_LABELS)]):
+                metrics[_LABELS[i]] = val
             return metrics
-
-    raw = inforow.get_text(" ")
-    all_nums = [int(m) for m in re.findall(r"\b(\d{2,3})\b", raw) if 10 <= int(m) <= 100]
-    for i, v in enumerate(all_nums[:len(_LABELS)]):
-        metrics[_LABELS[i]] = v
     return metrics
 
 
@@ -100,6 +144,17 @@ def parse_predictions(html: str, source: str) -> list[dict[str, Any]]:
     now_iso = datetime.now(timezone.utc).isoformat()
     results: list[dict[str, Any]] = []
 
+    # DEBUG: mostrar clases únicas para encontrar el elemento de hora
+    all_classes: set[str] = set()
+    for el in soup.select("[class]")[:200]:
+        for c in (el.get("class") or []):
+            all_classes.add(c)
+    time_like = [c for c in all_classes if any(
+        kw in c.lower() for kw in ["time","hora","hour","kick","match"]
+    )]
+    if time_like:
+        print(f"   [DEBUG] Clases relacionadas con hora encontradas: {time_like}")
+
     for comp in soup.select("div.competition"):
         comp_name = _txt(comp.select_one(".name"))
         matches   = comp.select("div.match") or comp.select("div.cmatch")
@@ -107,72 +162,66 @@ def parse_predictions(html: str, source: str) -> list[dict[str, Any]]:
             continue
 
         for match in matches:
-            # ── Hora: extraer y convertir a Colombia ──
-            hora_node = match.select_one(".time")
-            hora_raw  = re.sub(r"\s+", "", _txt(hora_node)).strip() if hora_node else ""
+            hora = _extract_hora(match)
 
-            # Si .time no tiene nada, buscar en texto crudo
-            if not hora_raw:
-                teams_raw_tmp = _txt(match.select_one(".teams") or match)
-                m_h = re.search(r"\b(\d{1,2}):(\d{2})\b", teams_raw_tmp)
-                if m_h:
-                    hora_raw = f"{m_h.group(1)}:{m_h.group(2)}"
-
-            # Convertir a hora Colombia
-            hora_col = _to_colombia_time(hora_raw) if hora_raw else ""
-            # Guardar ambas por si se necesitan en debug
-            hora_display = f"{hora_col} COL" if hora_col else ""
-
-            # ── Pronóstico ──
             pred_node = (
+                match.select_one(".tip .value .type3") or
                 match.select_one(".tip .type3") or
                 match.select_one(".tip .value") or
+                match.select_one(".value .type3") or
                 match.select_one(".type3")
             )
             pronostico = _txt(pred_node)
 
-            # ── Equipos ──
             teams_raw = _txt(match.select_one(".teams"))
             teams_txt = re.sub(r"^\d{4}-\d{2}-\d{2}\s+[\d\s:]+", "", teams_raw).strip()
-            teams_txt = re.sub(r"\s*[▸►→▶]\s*", " - ", teams_txt).strip()
+            teams_txt = re.sub(r"\s*[▸►→▶]\s*", " - ", teams_txt)
             teams_txt = re.sub(r"\s{2,}", " ", teams_txt).strip()
 
             equipo_local = equipo_visitante = ""
-            for sep in (" - ", " – ", " vs "):
+            for sep in (" - ", " – ", " vs ", " VS "):
                 if sep in teams_txt:
                     parts = [p.strip() for p in teams_txt.split(sep, 1)]
-                    equipo_local    = parts[0]
-                    equipo_visitante = parts[1] if len(parts) > 1 else ""
+                    equipo_local, equipo_visitante = (parts + [""])[:2]
                     break
             if not equipo_local:
                 equipo_local = teams_txt
 
-            metrics = _get_metrics(match)
+            metrics = _metrics_from_block(match)
             if metrics["prob_1"] == 0 and metrics["prob_2"] == 0:
-                metrics = _get_metrics(comp)
+                metrics = _metrics_from_block(comp)
 
-            if not teams_txt:
+            if not (pronostico or teams_txt):
                 continue
 
+            # Fallback: si HTML no tiene hora, convertir scraped_at UTC → Colombia
+            if not hora:
+                hora = _scraped_at_to_col(now_iso)
+
             results.append({
-                "competicion":       comp_name,
-                "hora":              hora_display,   # ← "HH:MM COL"
-                "hora_original":     hora_raw,       # ← hora CET del sitio (debug)
-                "pronostico":        pronostico,
-                "equipos":           teams_txt,
-                "equipo_local":      equipo_local,
-                "equipo_visitante":  equipo_visitante,
+                "competicion":      comp_name,
+                "hora":             hora,
+                "pronostico":       pronostico,
+                "equipos":          teams_txt,
+                "equipo_local":     equipo_local,
+                "equipo_visitante": equipo_visitante,
                 **{k: metrics[k] for k in _LABELS},
-                "origen":            source,
-                "scraped_at":        now_iso,
+                "origen":           source,
+                "scraped_at":       now_iso,
             })
+
+    # Debug resumen
+    con_hora = sum(1 for r in results if r["hora"])
+    print(f"   [DEBUG] {len(results)} partidos | {con_hora} con hora | {len(results)-con_hora} sin hora")
+    for r in results[:3]:
+        print(f"   • {r['hora'] or 'SIN HORA':14s} | {r['equipos'][:35]:35s} | 1={r['prob_1']}")
 
     return results
 
 
 def to_rows(items: list[dict[str, Any]]) -> tuple[list[dict], list[str]]:
     columns = [
-        "competicion", "hora", "hora_original", "pronostico",
+        "competicion", "hora", "pronostico",
         "equipo_local", "equipo_visitante", "equipos",
         "prob_1", "prob_x", "prob_2",
         "prob_ht1", "prob_htx", "prob_ht2",
