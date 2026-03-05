@@ -232,9 +232,10 @@ def _modal(r: dict, idx: int) -> str:
         <span class="text-muted small">
           <i class="bi bi-trophy me-1"></i>{comp}
         </span>
-        <span class="text-muted small ms-auto">
-          <i class="bi bi-clock me-1"></i>{hora}
-        </span>
+      <span class="badge bg-warning-subtle text-warning-emphasis 
+        border border-warning-subtle ms-auto">
+        <i class="bi bi-clock-fill me-1"></i>{hora}
+      </span>
       </div>
       <h5 class="mb-1 fw-black" style="color:{acc}">{fav}</h5>
       <div class="text-muted small">{eq}</div>
@@ -393,9 +394,10 @@ def _card(idx: int, r: dict) -> str:
           <span class="text-muted small text-truncate" style="max-width:250px">
             <i class="bi bi-geo-alt me-1"></i>{comp}
           </span>
-          <span class="text-muted small ms-auto">
-            <i class="bi bi-clock me-1"></i>{hora}
-          </span>
+        <span class="badge bg-warning-subtle text-warning-emphasis 
+          border border-warning-subtle ms-auto">
+          <i class="bi bi-clock-fill me-1"></i>{hora}
+        </span>
         </div>
         <div class="fw-black text-truncate mb-1" style="font-size:1rem;color:{acc}">{fav}</div>
         <div class="text-muted small text-truncate mb-1">{eq}</div>
