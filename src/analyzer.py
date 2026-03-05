@@ -1,21 +1,11 @@
 """
-analyzer.py — Análisis riguroso de predicciones de fútbol.
-
-Lógica:
-  1. Filtrar partidos del día actual.
-  2. Detectar tipo de pronóstico: 1 / 2 / X / 1X / X2 / 12 / UNK.
-  3. Calcular 'probabilidad de victoria' solo con prob_1 y prob_2.
-  4. Calcular 'confianza' (confidence score 0-100) ponderando:
-       - Probabilidad de victoria (peso 60%)
-       - Ventaja sobre el rival (margen local vs visitante, peso 20%)
-       - Claridad del pronóstico (si es 1X/X2 reduce confianza, peso 20%)
-  5. Clasificar en tier:
-       ÉLITE  → confianza >= 80
-       ALTA   → confianza >= 65
-       MEDIA  → confianza >= 50
-       BAJA   → el resto (estos se excluyen del Top 20)
-  6. Detectar "valor" (value bet): cuando el pronóstico coincide con
-     la mayor probabilidad Y el margen es >= 20 puntos.
+analyzer.py — Analiza TODOS los partidos del día, incluyendo mercados de goles.
+Pick types soportados:
+  1 / 2 / X        → resultado
+  1X / X2 / 12     → doble oportunidad
+  OVER_15/25/35    → goles
+  BTTS             → ambos anotan
+  UNK              → desconocido
 """
 
 import re
@@ -23,38 +13,41 @@ from datetime import datetime
 from typing import Any
 
 
-# ──────────────────────────────────────────────
-# Clasificación del pronóstico
-# ──────────────────────────────────────────────
+# ── Clasificación de pronóstico ──────────────────────────────
 
 def pick_type(pronostico: str) -> str:
-    p = (pronostico or "").lower().replace(" ", "").replace("—", "").replace("-", "")
-    if p.startswith("12"):   return "12"
-    if p.startswith("1x"):   return "1X"
-    if p.startswith("x2"):   return "X2"
-    if p.startswith("1"):    return "1"
-    if p.startswith("2"):    return "2"
-    if p.startswith("x") or "empate" in p or "draw" in p:
-        return "X"
+    p = (pronostico or "").lower().strip()
+
+    # Dobles primero (para no confundir con simples)
+    if re.search(r"\b12\b",  p): return "12"
+    if re.search(r"\b1x\b",  p): return "1X"
+    if re.search(r"\bx2\b",  p): return "X2"
+
+    # Resultado simple
+    if re.match(r"^1[\s—\-]",  p) or p == "1": return "1"
+    if re.match(r"^2[\s—\-]",  p) or p == "2": return "2"
+    if re.match(r"^x[\s—\-]",  p) or p == "x": return "X"
+    if "empate" in p or "draw" in p:            return "X"
+
+    # Mercado de goles — MUY COMUNES en este sitio
+    if re.search(r"m[aá]s\s+de\s+3[.,]5|over\s*3[.,]5|\+3[.,]5", p): return "OVER_35"
+    if re.search(r"m[aá]s\s+de\s+2[.,]5|over\s*2[.,]5|\+2[.,]5", p): return "OVER_25"
+    if re.search(r"m[aá]s\s+de\s+1[.,]5|over\s*1[.,]5|\+1[.,]5", p): return "OVER_15"
+    if re.search(r"menos\s+de|under",                               p): return "UNDER"
+    if re.search(r"ambos\s+anotan|btts|both\s+teams",               p): return "BTTS"
+
     return "UNK"
 
 
-# ──────────────────────────────────────────────
-# Filtro temporal
-# ──────────────────────────────────────────────
+# ── Filtro temporal ──────────────────────────────────────────
 
 def filter_today(items: list[dict]) -> list[dict]:
-    """
-    Si 'hora' tiene fecha dd/mm filtra por hoy.
-    Si hora está vacía o sin fecha → asume que es de hoy (comportamiento del sitio).
-    """
     today = datetime.now().strftime("%d/%m")
     out = []
     for it in items:
         h = (it.get("hora") or "").strip()
-        # Sin hora → asumir que es de hoy
         if not h:
-            out.append(it)
+            out.append(it)   # sin hora → asumir hoy
             continue
         m = re.search(r"\b(\d{1,2}/\d{1,2})\b", h)
         if m:
@@ -65,143 +58,191 @@ def filter_today(items: list[dict]) -> list[dict]:
     return out
 
 
-# ──────────────────────────────────────────────
-# Cálculo de confianza y metadata
-# ──────────────────────────────────────────────
+# ── Scoring por tipo de mercado ──────────────────────────────
 
-def _confidence(prob_win: int, prob_rival: int, pick: str,
-                elo_diff: float | None = None,
-                betplay_impl_prob: float = 0) -> int:
-    margin = max(0, prob_win - prob_rival)
-    clarity_map = {"1": 1.0, "2": 1.0, "1X": 0.70, "X2": 0.70, "12": 0.60, "UNK": 0.40}
-    clarity = clarity_map.get(pick, 0.50)
-    score = (prob_win * 0.50) + (min(margin, 50) * 0.30) + (clarity * 15)
+def _score_resultado(prob_win: int, prob_rival: int, pick: str,
+                     elo_diff: "float | None", bp_prob: float) -> int:
+    """Score para picks de resultado: 1, 2, 1X, X2, 12."""
+    margin  = max(0, prob_win - prob_rival)
+    clarity = {"1": 1.0, "2": 1.0, "1X": 0.75, "X2": 0.75, "12": 0.65}.get(pick, 0.55)
+    score   = (prob_win * 0.60) + (min(margin, 50) * 0.40) + (clarity * 20)
 
-    if elo_diff is not None:  # ← guard explícito antes de operar
-        elo_bonus = min(10, abs(elo_diff) / 30)
-        if (elo_diff > 0 and pick in ("1", "1X", "12")) or \
-           (elo_diff < 0 and pick in ("2", "X2", "12")):
-            score += elo_bonus
+    if elo_diff is not None:
+        bonus = min(8, abs(float(elo_diff)) / 40)
+        if (elo_diff > 0 and pick in ("1","1X","12")) or \
+           (elo_diff < 0 and pick in ("2","X2","12")):
+            score += bonus
         else:
-            score -= elo_bonus * 0.5
+            score -= bonus * 0.5
 
-    if betplay_impl_prob > 0:
-        diff = abs(prob_win - betplay_impl_prob)
-        if diff <= 10:    score += 10
-        elif diff <= 20:  score += 5
-        else:             score -= 5
+    if bp_prob > 0:
+        diff = abs(prob_win - bp_prob)
+        if diff <= 8:    score += 8
+        elif diff <= 15: score += 4
+        else:            score -= 4
 
     return min(100, max(0, round(score)))
 
 
+def _score_goles(prob_over: int, pick: str) -> int:
+    """Score para picks de mercado de goles."""
+    if pick == "OVER_15":
+        # Muy probable si > 75%, sospechoso si < 60%
+        score = (prob_over - 50) * 1.5 + 20
+    elif pick == "OVER_25":
+        score = (prob_over - 45) * 1.8 + 15
+    elif pick == "OVER_35":
+        score = (prob_over - 40) * 2.0 + 10
+    else:
+        score = (prob_over - 45) * 1.5 + 15
+    return min(100, max(0, round(score)))
+
+
+def _score_btts(prob_btts: int) -> int:
+    return min(100, max(0, round((prob_btts - 40) * 1.8 + 20)))
+
+
 def _tier(confidence: int) -> str:
-    if confidence >= 80:
-        return "ÉLITE"
-    if confidence >= 65:
-        return "ALTA"
-    if confidence >= 50:
-        return "MEDIA"
+    if confidence >= 65: return "ÉLITE"
+    if confidence >= 50: return "ALTA"
+    if confidence >= 35: return "MEDIA"
     return "BAJA"
 
 
-def _is_value_bet(prob_win: int, prob_rival: int) -> bool:
-    """
-    'Value' cuando la probabilidad de ganar supera al rival por ≥ 20 puntos
-    y está por encima del 60%.
-    """
-    return prob_win >= 60 and (prob_win - prob_rival) >= 20
+def _is_value_bet(confidence: int, prob_main: int, margin: int = 0) -> bool:
+    return confidence >= 55 and prob_main >= 50 and (margin >= 15 or prob_main >= 65)
 
 
-# ──────────────────────────────────────────────
-# Función principal de análisis
-# ──────────────────────────────────────────────
+# ── Análisis principal ───────────────────────────────────────
 
 def analyze(items: list[dict[str, Any]], top_n: int = 20) -> dict[str, Any]:
     """
-    Recibe la lista completa de predicciones (todas las del día).
-    Devuelve un dict con:
-      - 'top'       : lista de los mejores N picks enriquecidos
-      - 'stats'     : métricas globales del día
+    Analiza TODOS los partidos del día en TODOS los mercados.
+    Incluye resultado (1/X/2), doble oportunidad, goles (+1.5/+2.5/+3.5) y BTTS.
+    Devuelve los mejores top_n picks ordenados por confianza.
     """
     today_items = filter_today(items)
-
     enriched: list[dict] = []
+
     for it in today_items:
         pick = pick_type(it.get("pronostico", ""))
 
-        # Pronóstico de empate puro → excluir (no es un equipo ganador)
+        # Saltar empate puro y desconocidos sin datos
         if pick == "X":
             continue
 
-        p1 = int(it.get("prob_1", 0) or 0)
-        p2 = int(it.get("prob_2", 0) or 0)
+        p1   = int(it.get("prob_1",   0) or 0)
+        p2   = int(it.get("prob_2",   0) or 0)
+        px   = int(it.get("prob_x",   0) or 0)
+        o15  = int(it.get("prob_over_15", 0) or 0)
+        o25  = int(it.get("prob_over_25", 0) or 0)
+        o35  = int(it.get("prob_over_35", 0) or 0)
+        bty  = int(it.get("prob_btts_yes", 0) or 0)
 
-        # Determinar favorito y probabilidad de victoria
-        favorito = ""
-        prob_win = 0
-        prob_rival = 0
+        elo_diff = it.get("elo_diff")
+        is_local = pick in ("1", "1X")
+        bp_prob  = float(it.get("betplay_impl_prob_1", 0) or 0) if is_local else \
+                   float(it.get("betplay_impl_prob_2", 0) or 0)
 
-        if pick == "1":
-            favorito, prob_win, prob_rival = it.get("equipo_local") or "Local", p1, p2
-        elif pick == "2":
-            favorito, prob_win, prob_rival = it.get("equipo_visitante") or "Visitante", p2, p1
-        elif pick == "1X":
-            favorito, prob_win, prob_rival = it.get("equipo_local") or "Local", p1, p2
-        elif pick == "X2":
-            favorito, prob_win, prob_rival = it.get("equipo_visitante") or "Visitante", p2, p1
-        elif pick in ("12", "UNK"):
-            if p1 >= p2:
-                favorito, prob_win, prob_rival = it.get("equipo_local") or "Local", p1, p2
-            else:
-                favorito, prob_win, prob_rival = it.get("equipo_visitante") or "Visitante", p2, p1
+        # ── Picks de resultado ──
+        if pick in ("1", "2", "1X", "X2", "12"):
+            if pick in ("1", "1X"):
+                favorito   = it.get("equipo_local") or "Local"
+                prob_win   = p1
+                prob_rival = p2
+            elif pick in ("2", "X2"):
+                favorito   = it.get("equipo_visitante") or "Visitante"
+                prob_win   = p2
+                prob_rival = p1
+            else:  # 12
+                if p1 >= p2:
+                    favorito, prob_win, prob_rival = it.get("equipo_local") or "Local", p1, p2
+                else:
+                    favorito, prob_win, prob_rival = it.get("equipo_visitante") or "Visitante", p2, p1
 
-        # Descartar si no hay datos de probabilidad
-        if prob_win == 0:
+            if prob_win == 0:
+                continue
+
+            conf   = _score_resultado(prob_win, prob_rival, pick, elo_diff, bp_prob)
+            margin = prob_win - prob_rival
+            value  = _is_value_bet(conf, prob_win, margin)
+
+        # ── Picks de goles ──
+        elif pick in ("OVER_15", "OVER_25", "OVER_35"):
+            prob_map  = {"OVER_15": o15, "OVER_25": o25, "OVER_35": o35}
+            label_map = {"OVER_15": "+1.5 goles", "OVER_25": "+2.5 goles", "OVER_35": "+3.5 goles"}
+            prob_win  = prob_map[pick]
+            if prob_win < 30:
+                continue
+            favorito   = f"{it.get('equipos','')} — {label_map[pick]}"
+            prob_rival = 100 - prob_win
+            margin     = prob_win - prob_rival
+            conf       = _score_goles(prob_win, pick)
+            value      = conf >= 60 and prob_win >= 70
+
+        # ── Picks BTTS ──
+        elif pick == "BTTS":
+            if bty < 30:
+                continue
+            favorito   = f"{it.get('equipos','')} — Ambos anotan"
+            prob_win   = bty
+            prob_rival = 100 - bty
+            margin     = prob_win - prob_rival
+            conf       = _score_btts(bty)
+            value      = conf >= 60 and bty >= 65
+
+        # ── UNK: intentar con la prob más alta ──
+        elif pick == "UNK":
+            best = max((p1, "1", it.get("equipo_local") or "Local", p2),
+                       (p2, "2", it.get("equipo_visitante") or "Visitante", p1),
+                       key=lambda x: x[0])
+            prob_win, pick, favorito, prob_rival = best
+            if prob_win < 40:
+                continue
+            margin = prob_win - prob_rival
+            conf   = _score_resultado(int(prob_win), int(prob_rival), str(pick), elo_diff, bp_prob)
+            value  = _is_value_bet(conf, int(prob_win), int(margin))
+        else:
             continue
 
-        confidence = _confidence(prob_win, prob_rival, pick)
-        tier = _tier(confidence)
-        value = _is_value_bet(prob_win, prob_rival)
+        tier = _tier(conf)
 
         e = dict(it)
-        e.update(
-            {
-                "_favorito": favorito,
-                "_prob_win": prob_win,
-                "_prob_rival": prob_rival,
-                "_prob_empate": int(it.get("prob_x", 0) or 0),
-                "_pick": pick,
-                "_confidence": confidence,
-                "_tier": tier,
-                "_value": value,
-                "_margin": prob_win - prob_rival,
-            }
-        )
+        e.update({
+            "_favorito":    favorito,
+            "_prob_win":    int(prob_win),
+            "_prob_rival":  int(prob_rival),
+            "_prob_empate": px,
+            "_pick":        pick,
+            "_confidence":  conf,
+            "_tier":        tier,
+            "_value":       value,
+            "_margin":      int(prob_win) - int(prob_rival),
+        })
         enriched.append(e)
 
-    # Ordenar: primero por confianza, luego por prob_win
     enriched.sort(key=lambda x: (x["_confidence"], x["_prob_win"]), reverse=True)
-
     top = enriched[:top_n]
 
-    # ── Estadísticas del día ──
-    total = len(today_items)
-    elite_count = sum(1 for e in enriched if e["_tier"] == "ÉLITE")
-    alta_count = sum(1 for e in enriched if e["_tier"] == "ALTA")
-    value_count = sum(1 for e in enriched if e["_value"])
-    avg_conf = round(sum(e["_confidence"] for e in enriched) / len(enriched), 1) if enriched else 0
+    total         = len(today_items)
+    elite_count   = sum(1 for e in enriched if e["_tier"] == "ÉLITE")
+    alta_count    = sum(1 for e in enriched if e["_tier"] == "ALTA")
+    value_count   = sum(1 for e in enriched if e["_value"])
+    avg_conf      = round(sum(e["_confidence"] for e in enriched) / max(len(enriched),1), 1)
     competiciones = len({e["competicion"] for e in today_items if e.get("competicion")})
 
-    stats = {
-        "total_partidos": total,
-        "analizados": len(enriched),
-        "elite": elite_count,
-        "alta": alta_count,
-        "value_bets": value_count,
-        "avg_confidence": avg_conf,
-        "competiciones": competiciones,
-        "fecha": datetime.now().strftime("%d %b %Y"),
-        "hora_generacion": datetime.now().strftime("%H:%M:%S"),
+    return {
+        "top": top,
+        "stats": {
+            "total_partidos":  total,
+            "analizados":      len(enriched),
+            "elite":           elite_count,
+            "alta":            alta_count,
+            "value_bets":      value_count,
+            "avg_confidence":  avg_conf,
+            "competiciones":   competiciones,
+            "fecha":           datetime.now().strftime("%d %b %Y"),
+            "hora_generacion": datetime.now().strftime("%H:%M:%S"),
+        },
+        "all": enriched,
     }
-
-    return {"top": top, "stats": stats, "all": enriched}

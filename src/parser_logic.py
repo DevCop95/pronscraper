@@ -1,9 +1,9 @@
 """
 parser_logic.py
-DOM real: .competition > .body > .match > .inforow > .coefrow
-  Dentro de .coefrow hay .ownheader (etiquetas) + N .coefbox (valores)
-  Los .coefbox pueden contener texto directo o un div hijo con clase rNN.
-  Estrategia: leer el coefrow entero como texto y extraer números en orden.
+DOM real confirmado en DevTools:
+  .competition > .body > .match > .inforow > .coefrow
+    .ownheader  ← etiquetas (saltar)
+    .coefbox    ← valor numérico (puede tener hijo .value.rNN o texto directo)
 """
 
 import re
@@ -12,32 +12,24 @@ from typing import Any
 from datetime import datetime, timezone
 
 
-def _txt(node) -> str:
+def _txt(node: Any) -> str:
     return node.get_text(" ", strip=True) if node else ""
 
 
 def _numbers_from_coefrow(coefrow: Tag) -> list[int]:
-    """
-    Extrae los valores numéricos del coefrow en orden DOM,
-    ignorando el bloque ownheader (etiquetas) y descartando
-    números que claramente son labels (< 10).
-    """
+    """Lee .coefbox en orden DOM, salta .ownheader."""
     values: list[int] = []
     for child in coefrow.children:
         if not isinstance(child, Tag):
             continue
-        classes = child.get("class", []) if child.get("class") else []
-        # Saltar el bloque de etiquetas
+        classes = child.get("class") or []
         if "ownheader" in classes:
             continue
         if "coefbox" in classes:
-            # Extraer TODOS los dígitos del bloque completo
             raw = child.get_text(" ", strip=True)
-            # Buscar el primer número entero en el texto
             m = re.search(r"\b(\d{1,3})\b", raw)
             if m:
                 n = int(m.group(1))
-                # Los valores reales de % van de 10 a 100
                 if 10 <= n <= 100:
                     values.append(n)
     return values
@@ -57,7 +49,6 @@ def _get_metrics(block: Tag) -> dict[str, int]:
     if not inforow:
         return metrics
 
-    # Hay uno o más .coefrow; probar cada uno hasta tener ≥3 valores
     for coefrow in inforow.select(".coefrow"):
         vals = _numbers_from_coefrow(coefrow)
         if len(vals) >= 3:
@@ -65,12 +56,11 @@ def _get_metrics(block: Tag) -> dict[str, int]:
                 metrics[_LABELS[i]] = v
             return metrics
 
-    # Fallback: leer todos los números del inforow como texto bruto
-    raw_text = inforow.get_text(" ")
-    all_nums = [int(m) for m in re.findall(r"\b(\d{2,3})\b", raw_text) if 10 <= int(m) <= 100]
+    # Fallback: números de 2 cifras del inforow completo
+    raw = inforow.get_text(" ")
+    all_nums = [int(m) for m in re.findall(r"\b(\d{2,3})\b", raw) if 10 <= int(m) <= 100]
     for i, v in enumerate(all_nums[:len(_LABELS)]):
         metrics[_LABELS[i]] = v
-
     return metrics
 
 
@@ -81,21 +71,14 @@ def parse_predictions(html: str, source: str) -> list[dict[str, Any]]:
 
     for comp in soup.select("div.competition"):
         comp_name = _txt(comp.select_one(".name"))
-        # El sitio usa div.match (confirmado en DevTools)
-        matches = comp.select("div.match")
-        if not matches:
-            matches = comp.select("div.cmatch")
+        matches = comp.select("div.match") or comp.select("div.cmatch")
         if not matches:
             continue
 
         for match in matches:
-            # ── Hora ──
             hora_node = match.select_one(".time")
-            hora = ""
-            if hora_node:
-                hora = re.sub(r"\s+", " ", _txt(hora_node)).strip()
-            
-            # ── Pronóstico ──
+            hora = re.sub(r"\s+", " ", _txt(hora_node)).strip() if hora_node else ""
+
             pred_node = (
                 match.select_one(".tip .type3") or
                 match.select_one(".tip .value") or
@@ -103,21 +86,16 @@ def parse_predictions(html: str, source: str) -> list[dict[str, Any]]:
             )
             pronostico = _txt(pred_node)
 
-            # ── Equipos ── (el .teams puede incluir hora y caracteres raros)
             teams_raw = _txt(match.select_one(".teams"))
-            
-            # Limpiar: quitar fecha/hora al inicio (ej: "2026-03-05 21 : 30 ▸ ")
+            # Limpiar fecha/hora pegada al nombre
             teams_txt = re.sub(r"^\d{4}-\d{2}-\d{2}\s+[\d\s:]+", "", teams_raw).strip()
-            # Limpiar separadores raros (▸, ►, →, etc.) que no sean " - " o " – "
             teams_txt = re.sub(r"\s*[▸►→▶]\s*", " - ", teams_txt).strip()
-            # Quitar dobles espacios
             teams_txt = re.sub(r"\s{2,}", " ", teams_txt).strip()
-            
-            # Si la hora salió vacía, intentar extraerla del texto crudo del bloque
+
             if not hora:
-                m_hora = re.search(r"\b(\d{1,2}\s*:\s*\d{2})\b", teams_raw)
-                if m_hora:
-                    hora = re.sub(r"\s+", "", m_hora.group(1))
+                m_h = re.search(r"\b(\d{1,2}\s*:\s*\d{2})\b", teams_raw)
+                if m_h:
+                    hora = re.sub(r"\s+", "", m_h.group(1))
 
             equipo_local = equipo_visitante = ""
             for sep in (" - ", " – ", " vs "):
@@ -130,6 +108,8 @@ def parse_predictions(html: str, source: str) -> list[dict[str, Any]]:
                 equipo_local = teams_txt
 
             metrics = _get_metrics(match)
+            if metrics["prob_1"] == 0 and metrics["prob_2"] == 0:
+                metrics = _get_metrics(comp)
 
             if not teams_txt:
                 continue
