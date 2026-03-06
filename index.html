@@ -128,11 +128,28 @@
         <i class="bi bi-calendar3 me-1"></i>06 de march 2026
       </span>
       <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle small">
-        <i class="bi bi-clock me-1"></i>11:23:44
+        <i class="bi bi-clock me-1"></i><span id="live-clock">--:--:--</span>
       </span>
     </div>
   </div>
 </nav>
+<script>
+(function(){
+  function updateClock(){
+    const now = new Date();
+    // Colombia = UTC-5: convertir a UTC y restar 5 horas
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const col = new Date(utc + (-5 * 3600000));
+    const h = String(col.getHours()).padStart(2,'0');
+    const m = String(col.getMinutes()).padStart(2,'0');
+    const s = String(col.getSeconds()).padStart(2,'0');
+    const el = document.getElementById('live-clock');
+    if(el) el.textContent = h+':'+m+':'+s;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+})();
+</script>
 
 <!-- BANNER AVISO LEGAL — popup central -->
 <div id="avisoLegal" style="
