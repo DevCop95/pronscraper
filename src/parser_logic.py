@@ -164,6 +164,17 @@ def parse_predictions(html: str, source: str) -> list[dict[str, Any]]:
         for match in matches:
             hora = _extract_hora(match)
 
+            # ── Detectar partidos ya finalizados ──────────────────────────
+            # El sitio muestra div.goals="–" cuando no jugó, y "1","2",etc cuando sí.
+            # Si ambos .goals tienen dígitos → partido terminado → descartar.
+            goal_divs = match.select(".goals")
+            if len(goal_divs) >= 2:
+                g1 = re.sub(r"\s+", "", _txt(goal_divs[0]))
+                g2 = re.sub(r"\s+", "", _txt(goal_divs[1]))
+                if g1.isdigit() and g2.isdigit():
+                    continue   # partido finalizado, ignorar
+            # ──────────────────────────────────────────────────────────────
+
             pred_node = (
                 match.select_one(".tip .value .type3") or
                 match.select_one(".tip .type3") or

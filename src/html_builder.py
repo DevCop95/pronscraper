@@ -12,7 +12,7 @@ def _e(s: Any) -> str:
 
 TIER_CFG = {
     "ELITE": {"color": "#92720A", "bg": "#FBF5E0", "border": "#D4AA3A",
-               "badge": "warning",  "icon": "bi-trophy-fill",    "label": "ELITE"},
+               "badge": "warning",  "icon": "bi-trophy-fill",    "label": "ÉLITE"},
     "ALTA":  {"color": "#1A5C96", "bg": "#EBF4FF", "border": "#4A9BE8",
                "badge": "primary",  "icon": "bi-graph-up-arrow",  "label": "ALTA"},
     "MEDIA": {"color": "#4A5A6A", "bg": "#F2F5F8", "border": "#8A9BAC",
@@ -103,6 +103,10 @@ def _modal(r: dict, idx: int) -> str:
     elo_v   = r.get("elo_visitante")
     elo_d   = r.get("elo_diff")
     elo_fav = r.get("elo_favorito","—")
+    # Probabilidades ClubElo (de Fixtures endpoint)
+    elo_pw  = r.get("elo_prob_home_win")   # % victoria local según Elo
+    elo_pd  = r.get("elo_prob_draw")       # % empate según Elo
+    elo_pa  = r.get("elo_prob_away_win")   # % victoria visitante según Elo
     lpos    = r.get("local_pos"); lpts = r.get("local_pts"); lform = r.get("local_form","")
     vpos    = r.get("visita_pos"); vpts = r.get("visita_pts"); vform = r.get("visita_form","")
     bp_o1   = r.get("betplay_odds_1"); bp_ox = r.get("betplay_odds_x"); bp_o2 = r.get("betplay_odds_2")
@@ -117,11 +121,44 @@ def _modal(r: dict, idx: int) -> str:
 
     # Elo section
     elo_html = ""
-    if elo_l or elo_v:
+    if elo_l or elo_v or elo_pw is not None:
         elo_dir = (elo_d > 0 and is_local) or (elo_d and elo_d < 0 and not is_local) if elo_d else False
         elo_c   = "text-success" if elo_dir else "text-secondary"
+
+        # Sección de probabilidades ClubElo si están disponibles
+        elo_probs_html = ""
+        if elo_pw is not None:
+            elo_probs_html = f"""
+        <div class="mb-3">
+          <div class="d-flex align-items-center gap-1 mb-1">
+            <span class="small text-muted fw-semibold">Probabilidades según Elo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size:9px">CLUBELO</span>
+          </div>
+          <div class="row g-1 text-center">
+            <div class="col-4">
+              <div class="p-2 rounded {'bg-success-subtle border border-success-subtle' if elo_pw and elo_pw > max(elo_pd or 0, elo_pa or 0) else 'bg-light'}">
+                <div class="text-muted" style="font-size:11px">LOCAL</div>
+                <div class="fw-bold {'text-success' if elo_pw and elo_pw > max(elo_pd or 0, elo_pa or 0) else ''}" style="font-size:1.1rem">{elo_pw}%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded {'bg-secondary-subtle border border-secondary-subtle' if elo_pd and elo_pd > max(elo_pw or 0, elo_pa or 0) else 'bg-light'}">
+                <div class="text-muted" style="font-size:11px">EMPATE</div>
+                <div class="fw-bold" style="font-size:1.1rem">{elo_pd}%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded {'bg-primary-subtle border border-primary-subtle' if elo_pa and elo_pa > max(elo_pw or 0, elo_pd or 0) else 'bg-light'}">
+                <div class="text-muted" style="font-size:11px">VISITA</div>
+                <div class="fw-bold {'text-primary' if elo_pa and elo_pa > max(elo_pw or 0, elo_pd or 0) else ''}" style="font-size:1.1rem">{elo_pa}%</div>
+              </div>
+            </div>
+          </div>
+        </div>"""
+
         elo_html = f"""
         {_section_hd("Club Elo — Fuerza histórica","bi-lightning-charge-fill")}
+        {elo_probs_html}
         <div class="row g-2 mb-2">
           <div class="col-6">
             <div class="card border-0 bg-light text-center py-3">
@@ -566,6 +603,67 @@ def build(
   </div>
 </nav>
 
+<!-- BANNER AVISO LEGAL — popup central -->
+<div id="avisoLegal" style="
+  position:fixed;inset:0;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)">
+  <div style="
+    background:linear-gradient(160deg,#1a1a2e 0%,#16213e 100%);
+    border:2px solid #B8960C;border-radius:20px;
+    max-width:520px;width:90%;padding:40px 36px 32px;
+    box-shadow:0 24px 80px rgba(0,0,0,0.6);
+    text-align:center;position:relative">
+
+    <!-- Ícono central -->
+    <div style="
+      width:64px;height:64px;border-radius:50%;
+      background:linear-gradient(135deg,#B8960C,#7A5E08);
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 20px;box-shadow:0 8px 24px rgba(184,150,12,0.4)">
+      <i class="bi bi-shield-exclamation" style="font-size:1.8rem;color:#fff"></i>
+    </div>
+
+    <!-- Título -->
+    <div style="font-size:11px;letter-spacing:3px;color:#B8960C;font-weight:700;margin-bottom:8px;text-transform:uppercase">
+      Aviso Importante
+    </div>
+    <h3 style="color:#fff;font-weight:900;font-size:1.4rem;margin-bottom:16px;line-height:1.3">
+      Este sitio es solo para<br><span style="color:#B8960C">análisis estadístico</span>
+    </h3>
+
+    <!-- Cuerpo -->
+    <p style="color:#aab4c8;font-size:13.5px;line-height:1.7;margin-bottom:24px">
+      La información presentada <strong style="color:#fff">no constituye consejo, recomendación
+      ni incitación a realizar apuestas</strong> de ningún tipo.<br><br>
+      Las apuestas pueden generar <strong style="color:#e74c3c">adicción y pérdidas económicas graves.</strong>
+      Si tienes problemas con el juego, busca ayuda profesional.
+    </p>
+
+    <!-- Línea divisora -->
+    <div style="height:1px;background:linear-gradient(90deg,transparent,#B8960C,transparent);margin-bottom:24px"></div>
+
+    <!-- Botón aceptar -->
+    <button onclick="document.getElementById('avisoLegal').style.display='none'"
+      style="
+        background:linear-gradient(135deg,#B8960C,#7A5E08);
+        color:#fff;border:none;border-radius:50px;
+        padding:12px 40px;font-size:14px;font-weight:700;
+        cursor:pointer;letter-spacing:1px;text-transform:uppercase;
+        box-shadow:0 4px 20px rgba(184,150,12,0.4);
+        transition:transform .15s,box-shadow .15s"
+      onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 6px 28px rgba(184,150,12,0.6)'"
+      onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(184,150,12,0.4)'">
+      <i class="bi bi-check-circle-fill me-2"></i>Entendido, continuar
+    </button>
+
+    <!-- Dev credit -->
+    <div style="margin-top:20px;color:#4a5568;font-size:11px">
+      <i class="bi bi-code-slash me-1"></i>Desarrollado por <strong style="color:#6b7280">DevOpsHB</strong>
+    </div>
+  </div>
+</div>
+
 <!-- HERO -->
 <section class="hero-section py-5">
   <div class="container-xl">
@@ -584,7 +682,7 @@ def build(
         </p>
         <div class="d-flex flex-wrap gap-2">
           <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2">
-            <i class="bi bi-trophy-fill me-1"></i>{stats.get('elite',0)} Elite
+            <i class="bi bi-trophy-fill me-1"></i>{stats.get('elite',0)} Élite
           </span>
           <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle px-3 py-2">
             <i class="bi bi-graph-up-arrow me-1"></i>{stats.get('alta',0)} Alta
@@ -600,7 +698,7 @@ def build(
       <div class="col-lg-5 d-none d-lg-block">
         <div class="row g-3">
           {_stat_card(stats.get('total_partidos',0),"Partidos","bi-calendar-event","#1A5C96")}
-          {_stat_card(stats.get('elite',0),"Elite","bi-trophy-fill","#92720A")}
+          {_stat_card(stats.get('elite',0),"Élite","bi-trophy-fill","#92720A")}
           {_stat_card(stats.get('alta',0),"Alta","bi-graph-up-arrow","#1A5C96")}
           {_stat_card(stats.get('value_bets',0),"Value Bets","bi-gem","#92720A")}
           {_stat_card(f"{avg_c}%","Confianza","bi-speedometer2","#1A7A60")}
@@ -625,7 +723,7 @@ def build(
         <i class="bi bi-grid-3x3-gap me-1"></i>Todos
       </button>
       <button class="btn btn-sm btn-outline-warning rounded-pill tier-btn" data-t="ELITE">
-        <i class="bi bi-trophy-fill me-1"></i>Elite
+        <i class="bi bi-trophy-fill me-1"></i>Élite
       </button>
       <button class="btn btn-sm btn-outline-primary rounded-pill tier-btn" data-t="ALTA">
         <i class="bi bi-graph-up-arrow me-1"></i>Alta
@@ -659,7 +757,7 @@ def build(
       <div class="small fw-bold text-uppercase text-muted mb-3" style="letter-spacing:2px">Leyenda</div>
       <div class="row g-2 align-items-center">
         <div class="col-auto">
-          <span class="badge bg-warning text-dark"><i class="bi bi-trophy-fill me-1"></i>ELITE</span>
+          <span class="badge bg-warning text-dark"><i class="bi bi-trophy-fill me-1"></i>ÉLITE</span>
           <span class="small text-muted ms-1">Confianza ≥ 65</span>
         </div>
         <div class="col-auto">
@@ -685,8 +783,8 @@ def build(
   </div>
 
   <footer class="d-flex justify-content-between flex-wrap gap-2 mt-4 pt-3 border-top small text-muted">
-    <span>© {datetime.now().year} {_e(creator_name)} — pronosticosfutbol365.com · clubelo.com</span>
-    <span>Solo fines informativos. No constituye consejo de apuestas.</span>
+    <span>© {datetime.now().year} <strong>DevOpsHB</strong> · Datos: pronosticosfutbol365.com · clubelo.com</span>
+    <span><i class="bi bi-code-slash me-1"></i>Desarrollado por DevOpsHB</span>
   </footer>
 </div>
 
