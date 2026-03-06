@@ -3,8 +3,8 @@ services:
     name: pronscraper
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    healthCheckPath: /status
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
-    healthCheckPath: /status
+        value: "3.11.0"
