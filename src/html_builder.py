@@ -103,12 +103,13 @@ def _modal(r: dict, idx: int) -> str:
     elo_v   = r.get("elo_visitante")
     elo_d   = r.get("elo_diff")
     elo_fav = r.get("elo_favorito","—")
-    # Probabilidades ClubElo (de Fixtures endpoint)
-    elo_pw  = r.get("elo_prob_home_win")   # % victoria local según Elo
-    elo_pd  = r.get("elo_prob_draw")       # % empate según Elo
-    elo_pa  = r.get("elo_prob_away_win")   # % victoria visitante según Elo
+    elo_pw  = r.get("elo_prob_home_win")
+    elo_pd  = r.get("elo_prob_draw")
+    elo_pa  = r.get("elo_prob_away_win")
     lpos    = r.get("local_pos"); lpts = r.get("local_pts"); lform = r.get("local_form","")
     vpos    = r.get("visita_pos"); vpts = r.get("visita_pts"); vform = r.get("visita_form","")
+    lform_data = r.get("local_form_data", [])
+    vform_data = r.get("visita_form_data", [])
     bp_o1   = r.get("betplay_odds_1"); bp_ox = r.get("betplay_odds_x"); bp_o2 = r.get("betplay_odds_2")
     bp_p1   = r.get("betplay_impl_prob_1",0); bp_px = r.get("betplay_impl_prob_x",0)
     bp_p2   = r.get("betplay_impl_prob_2",0)
@@ -119,13 +120,12 @@ def _modal(r: dict, idx: int) -> str:
     vtag     = ('<span class="badge bg-warning text-dark ms-1"><i class="bi bi-gem me-1"></i>VALUE BET</span>'
                 if r.get("_value") else "")
 
-    # Elo section
+    # ── Elo section ───────────────────────────────────────────────────────────
     elo_html = ""
     if elo_l or elo_v or elo_pw is not None:
         elo_dir = (elo_d > 0 and is_local) or (elo_d and elo_d < 0 and not is_local) if elo_d else False
         elo_c   = "text-success" if elo_dir else "text-secondary"
 
-        # Sección de probabilidades ClubElo si están disponibles
         elo_probs_html = ""
         if elo_pw is not None:
             elo_probs_html = f"""
@@ -178,7 +178,50 @@ def _modal(r: dict, idx: int) -> str:
         {_stat_row_bs("Diferencia", f"{'+' if elo_d and elo_d>0 else ''}{int(elo_d) if elo_d else '—'} pts","<i class='bi bi-arrows-expand-vertical'></i>", bool(elo_d and abs(elo_d)>30))}
         {_stat_row_bs("Favorito por Elo", elo_fav or "—","<i class='bi bi-star-fill'></i>")}"""
 
-    # Standings
+    # ── Últimos 5 partidos ────────────────────────────────────────────────────
+    def _form_row(m: dict) -> str:
+        res   = m.get("result","?")
+        chg   = m.get("change", 0)
+        dt    = (m.get("date","") or "")[:10]
+        elo_a = m.get("elo_after","—")
+        color = {"W":"#198754","D":"#6c757d","L":"#dc3545"}.get(res,"#aaa")
+        label = {"W":"V","D":"E","L":"D"}.get(res,"?")
+        sign  = "+" if chg > 0 else ""
+        return (f'<tr>'
+                f'<td><span class="badge rounded-pill" style="background:{color};min-width:28px">{label}</span></td>'
+                f'<td class="text-muted small">{dt}</td>'
+                f'<td class="text-end small fw-semibold" style="color:{color}">{sign}{chg}</td>'
+                f'<td class="text-end small text-muted">{int(elo_a) if elo_a != "—" else "—"}</td>'
+                f'</tr>')
+
+    form_html = ""
+    if lform_data or vform_data:
+        rows_l = "".join(_form_row(m) for m in lform_data) or '<tr><td colspan="4" class="text-muted small">Sin datos</td></tr>'
+        rows_v = "".join(_form_row(m) for m in vform_data) or '<tr><td colspan="4" class="text-muted small">Sin datos</td></tr>'
+        form_html = f"""
+        {_section_hd("Últimos 5 partidos — Forma reciente","bi-bar-chart-steps")}
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="fw-semibold small mb-2 text-truncate">{local_n}</div>
+            <table class="table table-sm mb-0" style="font-size:12px">
+              <thead class="table-light"><tr>
+                <th>Res</th><th>Fecha</th><th class="text-end">Δ Elo</th><th class="text-end">Elo</th>
+              </tr></thead>
+              <tbody>{rows_l}</tbody>
+            </table>
+          </div>
+          <div class="col-6">
+            <div class="fw-semibold small mb-2 text-truncate">{visita_n}</div>
+            <table class="table table-sm mb-0" style="font-size:12px">
+              <thead class="table-light"><tr>
+                <th>Res</th><th>Fecha</th><th class="text-end">Δ Elo</th><th class="text-end">Elo</th>
+              </tr></thead>
+              <tbody>{rows_v}</tbody>
+            </table>
+          </div>
+        </div>"""
+
+    # ── Standings ─────────────────────────────────────────────────────────────
     stand_html = ""
     if lpos or vpos:
         stand_html = f"""
@@ -206,7 +249,7 @@ def _modal(r: dict, idx: int) -> str:
           </table>
         </div>"""
 
-    # BetPlay
+    # ── BetPlay ───────────────────────────────────────────────────────────────
     bp_html = ""
     if bp_ok and bp_o1:
         agreement = abs(p_win - (bp_p1 if is_local else bp_p2))
@@ -235,7 +278,7 @@ def _modal(r: dict, idx: int) -> str:
         </div>
         {_stat_row_bs("Consenso",f'<i class="bi {agree_icon}"></i> {agree_txt}',"",agreement<=10)}"""
 
-    # Radial SVG
+    # ── Radial SVG ────────────────────────────────────────────────────────────
     circ = 125.66
     dash = circ * conf / 100
     colors = {"ELITE":"#92720A","ALTA":"#1A5C96","MEDIA":"#6A7A8A","BAJA":"#B0BAC8"}
@@ -317,6 +360,7 @@ def _modal(r: dict, idx: int) -> str:
     </div>
 
     {elo_html}
+    {form_html}
     {stand_html}
     {bp_html}
 
@@ -371,7 +415,6 @@ def _card(idx: int, r: dict) -> str:
     vtag = ('<span class="badge bg-warning text-dark small"><i class="bi bi-gem me-1"></i>VALUE</span>'
             if value else "")
 
-    # Progress bars
     p1w = min(100,p1); pxw = min(100,px); p2w = min(100,p2)
     active_c = acc
 
@@ -473,7 +516,7 @@ def build(
     top: list[dict],
     stats: dict,
     output_path: "str | Path" = "index.html",
-    creator_name: str = "Yared Henriquez",
+    creator_name: str = "DevOpsHB",
     creator_image: str = "creador.png",
     favicon: str = "favicon.ico",
 ) -> None:
@@ -484,7 +527,6 @@ def build(
         f'data-comp="{_e(c)}">{_e(c)}</button>' for c in comps
     )
     today  = datetime.now().strftime("%d de %B %Y").capitalize()
-    gen    = stats.get("hora_generacion","")
     avg_c  = stats.get("avg_confidence",0)
 
     doc = f"""<!DOCTYPE html>
@@ -509,41 +551,21 @@ def build(
   h1,h2,h3,h4,h5,.fw-black{{font-family:'Sora',sans-serif}}
   .fw-black{{font-weight:900!important}}
   .navbar-brand{{font-family:'Sora',sans-serif;font-weight:900}}
-
-  /* Cards */
   .card-match{{transition:all .18s ease;border-left-width:4px!important}}
   .card-match:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1)!important}}
-
-  /* Tier buttons */
   .tier-btn.active{{background:var(--gold-lt)!important;border-color:var(--gold)!important;color:var(--gold)!important;font-weight:600}}
   .comp-chip.active{{background:var(--gold-lt)!important;border-color:var(--gold)!important;color:var(--gold)!important;font-weight:600}}
-
-  /* Badge warning override */
   .badge.bg-warning{{color:#333!important}}
-
-  /* Progress */
   .progress{{border-radius:99px}}
   .progress-bar{{border-radius:99px;transition:width .5s ease}}
-
-  /* Offcanvas */
   .offcanvas-header{{background:#FAFBFD}}
-
-  /* Animations */
   @keyframes fadeUp{{from{{opacity:0;transform:translateY(10px)}}to{{opacity:1;transform:translateY(0)}}}}
   .card-match{{animation:fadeUp .3s ease both}}
   {chr(10).join(f'.card-match:nth-child({i}){{animation-delay:{i*0.04:.2f}s}}' for i in range(1,22))}
-
-  /* Hero gradient */
-  .hero-section{{background:linear-gradient(135deg,#FAFBFD 0%,#F0F5FF 100%);
-    border-bottom:1px solid #DDE3EC}}
-
-  /* Navbar */
+  .hero-section{{background:linear-gradient(135deg,#FAFBFD 0%,#F0F5FF 100%);border-bottom:1px solid #DDE3EC}}
   .navbar{{border-bottom:1px solid #DDE3EC;background:#fff!important}}
-
-  /* Scrollbar offcanvas */
   .offcanvas-body::-webkit-scrollbar{{width:4px}}
   .offcanvas-body::-webkit-scrollbar-thumb{{background:#DDE3EC;border-radius:2px}}
-
   @media(max-width:576px){{
     .hero-section .display-5{{font-size:1.75rem}}
     .modal-body .row.g-3 .col-4{{font-size:.9rem}}
@@ -606,7 +628,6 @@ def build(
 (function(){{
   function updateClock(){{
     const now = new Date();
-    // Colombia = UTC-5: convertir a UTC y restar 5 horas
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
     const col = new Date(utc + (-5 * 3600000));
     const h = String(col.getHours()).padStart(2,'0');
@@ -620,7 +641,7 @@ def build(
 }})();
 </script>
 
-<!-- BANNER AVISO LEGAL — popup central -->
+<!-- AVISO LEGAL -->
 <div id="avisoLegal" style="
   position:fixed;inset:0;z-index:9999;
   display:flex;align-items:center;justify-content:center;
@@ -631,50 +652,35 @@ def build(
     max-width:520px;width:90%;padding:40px 36px 32px;
     box-shadow:0 24px 80px rgba(0,0,0,0.6);
     text-align:center;position:relative">
-
-    <!-- Ícono central -->
-    <div style="
-      width:64px;height:64px;border-radius:50%;
+    <div style="width:64px;height:64px;border-radius:50%;
       background:linear-gradient(135deg,#B8960C,#7A5E08);
       display:flex;align-items:center;justify-content:center;
       margin:0 auto 20px;box-shadow:0 8px 24px rgba(184,150,12,0.4)">
       <i class="bi bi-shield-exclamation" style="font-size:1.8rem;color:#fff"></i>
     </div>
-
-    <!-- Título -->
     <div style="font-size:11px;letter-spacing:3px;color:#B8960C;font-weight:700;margin-bottom:8px;text-transform:uppercase">
       Aviso Importante
     </div>
     <h3 style="color:#fff;font-weight:900;font-size:1.4rem;margin-bottom:16px;line-height:1.3">
       Este sitio es solo para<br><span style="color:#B8960C">análisis estadístico</span>
     </h3>
-
-    <!-- Cuerpo -->
     <p style="color:#aab4c8;font-size:13.5px;line-height:1.7;margin-bottom:24px">
       La información presentada <strong style="color:#fff">no constituye consejo, recomendación
       ni incitación a realizar apuestas</strong> de ningún tipo.<br><br>
       Las apuestas pueden generar <strong style="color:#e74c3c">adicción y pérdidas económicas graves.</strong>
       Si tienes problemas con el juego, busca ayuda profesional.
     </p>
-
-    <!-- Línea divisora -->
     <div style="height:1px;background:linear-gradient(90deg,transparent,#B8960C,transparent);margin-bottom:24px"></div>
-
-    <!-- Botón aceptar -->
     <button onclick="document.getElementById('avisoLegal').style.display='none'"
-      style="
-        background:linear-gradient(135deg,#B8960C,#7A5E08);
+      style="background:linear-gradient(135deg,#B8960C,#7A5E08);
         color:#fff;border:none;border-radius:50px;
         padding:12px 40px;font-size:14px;font-weight:700;
         cursor:pointer;letter-spacing:1px;text-transform:uppercase;
-        box-shadow:0 4px 20px rgba(184,150,12,0.4);
-        transition:transform .15s,box-shadow .15s"
-      onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 6px 28px rgba(184,150,12,0.6)'"
-      onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(184,150,12,0.4)'">
+        box-shadow:0 4px 20px rgba(184,150,12,0.4)"
+      onmouseover="this.style.transform='scale(1.05)'"
+      onmouseout="this.style.transform='scale(1)'">
       <i class="bi bi-check-circle-fill me-2"></i>Entendido, continuar
     </button>
-
-    <!-- Dev credit -->
     <div style="margin-top:20px;color:#4a5568;font-size:11px">
       <i class="bi bi-code-slash me-1"></i>Desarrollado por <strong style="color:#6b7280">DevOpsHB</strong>
     </div>
@@ -728,8 +734,6 @@ def build(
 
 <!-- MAIN -->
 <div class="container-xl py-4">
-
-  <!-- Filtros -->
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
     <div class="small fw-bold text-uppercase d-flex align-items-center gap-2" style="letter-spacing:2px;color:var(--gold)">
       <span style="display:inline-block;width:3px;height:16px;background:var(--gold);border-radius:2px"></span>
@@ -751,7 +755,6 @@ def build(
     </div>
   </div>
 
-  <!-- Chips ligas -->
   <div class="d-flex flex-wrap gap-2 mb-4" id="comp-chips">
     <button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill active" data-comp="ALL">
       <i class="bi bi-globe me-1"></i>Todas las ligas
@@ -759,16 +762,13 @@ def build(
     {chips}
   </div>
 
-  <!-- Cards -->
   <div id="cards">{cards}</div>
 
-  <!-- Empty state -->
   <div id="empty-state" class="text-center py-5 d-none">
     <i class="bi bi-search display-3 text-muted"></i>
     <div class="text-muted mt-3">No hay picks para este filtro</div>
   </div>
 
-  <!-- Leyenda -->
   <div class="card border-0 shadow-sm mt-4">
     <div class="card-body">
       <div class="small fw-bold text-uppercase text-muted mb-3" style="letter-spacing:2px">Leyenda</div>
@@ -808,7 +808,6 @@ def build(
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 (function(){{
-  // Modal creador
   const KEY = 'sport_v5';
   try {{
     if (!localStorage.getItem(KEY)) {{

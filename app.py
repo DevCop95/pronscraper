@@ -13,7 +13,7 @@ from src.parser_logic    import parse_predictions, to_rows
 from src.analyzer        import analyze
 from src.html_builder    import build as build_html
 from src.betplay_fetcher import enrich_with_betplay
-from src.stats_enricher  import enrich_with_stats
+from src.stats_enricher  import enrich_with_stats, enrich_with_form
 
 OUT_DIR       = Path("outputs")
 INDEX_HTML    = Path("index.html")
@@ -66,9 +66,8 @@ def run_pipeline(force: bool = False) -> bool:
         print(f"\n{'─'*55}")
         print(f"🔄 Pipeline #{run_n} — {_col_ts()}")
 
-        # ── Scraping con fallback a caché ──────────────────────────────
-        HTML_CACHE = OUT_DIR / "cache.html"
         print("⬇  Scraping...")
+        HTML_CACHE = OUT_DIR / "cache.html"
         try:
             html_text = fetch_html(ALLOWED_URL)
             HTML_CACHE.write_text(html_text, encoding="utf-8")
@@ -105,6 +104,13 @@ def run_pipeline(force: bool = False) -> bool:
         result     = analyze(items, top_n=TOP_N)
         top        = result["top"]
         stats_data = result["stats"]
+
+        # Forma: SOLO para el top (máx 40 requests en vez de 238)
+        elo_names = [k for k in [r.get("equipo_local","") for r in top] +
+                                 [r.get("equipo_visitante","") for r in top] if k]
+        print(f"📅 Forma reciente ({len(top)} partidos del top)...")
+        top = enrich_with_form(top, elo_names)
+
         print(f"   ✓ {stats_data['total_partidos']} partidos | "
               f"{stats_data['elite']} ELITE | {stats_data['alta']} Alta | "
               f"{stats_data['value_bets']} Value")
@@ -154,12 +160,12 @@ def run_pipeline(force: bool = False) -> bool:
             _state["running"] = False
 
 
-# ── Arranque sincrónico ───────────────────────────────────────────────────────
+# Arranque sincrónico
 print("🚀 Arrancando servidor — ejecutando pipeline inicial...")
 run_pipeline(force=True)
 
 
-# ── Background thread cada hora ───────────────────────────────────────────────
+# Background thread cada hora
 def _background_loop():
     while True:
         time.sleep(REFRESH_MINS * 60)
@@ -171,8 +177,6 @@ def _background_loop():
 _bg = threading.Thread(target=_background_loop, daemon=True, name="bg-pipeline")
 _bg.start()
 
-
-# ── Rutas ─────────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
@@ -204,17 +208,6 @@ def index():
 
 @app.route("/upload", methods=["POST"])
 def upload_html():
-    """
-    Recibe HTML desde tu PC y lo procesa.
-    Desde PowerShell:
-    python -c "
-    from src.scraper import fetch_html, ALLOWED_URL
-    import requests
-    html = fetch_html(ALLOWED_URL)
-    r = requests.post('https://pronscraper.onrender.com/upload', data=html.encode('utf-8'))
-    print(r.json())
-    "
-    """
     html = request.get_data(as_text=True)
     if not html or len(html) < 500:
         return jsonify({"error": "HTML vacío o muy corto"}), 400

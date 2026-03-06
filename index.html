@@ -20,26 +20,14 @@
   h1,h2,h3,h4,h5,.fw-black{font-family:'Sora',sans-serif}
   .fw-black{font-weight:900!important}
   .navbar-brand{font-family:'Sora',sans-serif;font-weight:900}
-
-  /* Cards */
   .card-match{transition:all .18s ease;border-left-width:4px!important}
   .card-match:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1)!important}
-
-  /* Tier buttons */
   .tier-btn.active{background:var(--gold-lt)!important;border-color:var(--gold)!important;color:var(--gold)!important;font-weight:600}
   .comp-chip.active{background:var(--gold-lt)!important;border-color:var(--gold)!important;color:var(--gold)!important;font-weight:600}
-
-  /* Badge warning override */
   .badge.bg-warning{color:#333!important}
-
-  /* Progress */
   .progress{border-radius:99px}
   .progress-bar{border-radius:99px;transition:width .5s ease}
-
-  /* Offcanvas */
   .offcanvas-header{background:#FAFBFD}
-
-  /* Animations */
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   .card-match{animation:fadeUp .3s ease both}
   .card-match:nth-child(1){animation-delay:0.04s}
@@ -63,18 +51,10 @@
 .card-match:nth-child(19){animation-delay:0.76s}
 .card-match:nth-child(20){animation-delay:0.80s}
 .card-match:nth-child(21){animation-delay:0.84s}
-
-  /* Hero gradient */
-  .hero-section{background:linear-gradient(135deg,#FAFBFD 0%,#F0F5FF 100%);
-    border-bottom:1px solid #DDE3EC}
-
-  /* Navbar */
+  .hero-section{background:linear-gradient(135deg,#FAFBFD 0%,#F0F5FF 100%);border-bottom:1px solid #DDE3EC}
   .navbar{border-bottom:1px solid #DDE3EC;background:#fff!important}
-
-  /* Scrollbar offcanvas */
   .offcanvas-body::-webkit-scrollbar{width:4px}
   .offcanvas-body::-webkit-scrollbar-thumb{background:#DDE3EC;border-radius:2px}
-
   @media(max-width:576px){
     .hero-section .display-5{font-size:1.75rem}
     .modal-body .row.g-3 .col-4{font-size:.9rem}
@@ -137,7 +117,6 @@
 (function(){
   function updateClock(){
     const now = new Date();
-    // Colombia = UTC-5: convertir a UTC y restar 5 horas
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
     const col = new Date(utc + (-5 * 3600000));
     const h = String(col.getHours()).padStart(2,'0');
@@ -151,7 +130,7 @@
 })();
 </script>
 
-<!-- BANNER AVISO LEGAL — popup central -->
+<!-- AVISO LEGAL -->
 <div id="avisoLegal" style="
   position:fixed;inset:0;z-index:9999;
   display:flex;align-items:center;justify-content:center;
@@ -162,50 +141,35 @@
     max-width:520px;width:90%;padding:40px 36px 32px;
     box-shadow:0 24px 80px rgba(0,0,0,0.6);
     text-align:center;position:relative">
-
-    <!-- Ícono central -->
-    <div style="
-      width:64px;height:64px;border-radius:50%;
+    <div style="width:64px;height:64px;border-radius:50%;
       background:linear-gradient(135deg,#B8960C,#7A5E08);
       display:flex;align-items:center;justify-content:center;
       margin:0 auto 20px;box-shadow:0 8px 24px rgba(184,150,12,0.4)">
       <i class="bi bi-shield-exclamation" style="font-size:1.8rem;color:#fff"></i>
     </div>
-
-    <!-- Título -->
     <div style="font-size:11px;letter-spacing:3px;color:#B8960C;font-weight:700;margin-bottom:8px;text-transform:uppercase">
       Aviso Importante
     </div>
     <h3 style="color:#fff;font-weight:900;font-size:1.4rem;margin-bottom:16px;line-height:1.3">
       Este sitio es solo para<br><span style="color:#B8960C">análisis estadístico</span>
     </h3>
-
-    <!-- Cuerpo -->
     <p style="color:#aab4c8;font-size:13.5px;line-height:1.7;margin-bottom:24px">
       La información presentada <strong style="color:#fff">no constituye consejo, recomendación
       ni incitación a realizar apuestas</strong> de ningún tipo.<br><br>
       Las apuestas pueden generar <strong style="color:#e74c3c">adicción y pérdidas económicas graves.</strong>
       Si tienes problemas con el juego, busca ayuda profesional.
     </p>
-
-    <!-- Línea divisora -->
     <div style="height:1px;background:linear-gradient(90deg,transparent,#B8960C,transparent);margin-bottom:24px"></div>
-
-    <!-- Botón aceptar -->
     <button onclick="document.getElementById('avisoLegal').style.display='none'"
-      style="
-        background:linear-gradient(135deg,#B8960C,#7A5E08);
+      style="background:linear-gradient(135deg,#B8960C,#7A5E08);
         color:#fff;border:none;border-radius:50px;
         padding:12px 40px;font-size:14px;font-weight:700;
         cursor:pointer;letter-spacing:1px;text-transform:uppercase;
-        box-shadow:0 4px 20px rgba(184,150,12,0.4);
-        transition:transform .15s,box-shadow .15s"
-      onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 6px 28px rgba(184,150,12,0.6)'"
-      onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(184,150,12,0.4)'">
+        box-shadow:0 4px 20px rgba(184,150,12,0.4)"
+      onmouseover="this.style.transform='scale(1.05)'"
+      onmouseout="this.style.transform='scale(1)'">
       <i class="bi bi-check-circle-fill me-2"></i>Entendido, continuar
     </button>
-
-    <!-- Dev credit -->
     <div style="margin-top:20px;color:#4a5568;font-size:11px">
       <i class="bi bi-code-slash me-1"></i>Desarrollado por <strong style="color:#6b7280">DevOpsHB</strong>
     </div>
@@ -224,33 +188,33 @@
           Top <span style="color:var(--gold)">20</span> Picks<br>del Día
         </h1>
         <p class="text-muted mb-4" style="max-width:480px">
-          <strong>94</strong> partidos analizados de
-          <strong>53</strong> competiciones.
+          <strong>88</strong> partidos analizados de
+          <strong>51</strong> competiciones.
           Haz clic en cualquier pick para ver análisis completo.
         </p>
         <div class="d-flex flex-wrap gap-2">
           <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2">
-            <i class="bi bi-trophy-fill me-1"></i>12 Élite
+            <i class="bi bi-trophy-fill me-1"></i>11 Élite
           </span>
           <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle px-3 py-2">
-            <i class="bi bi-graph-up-arrow me-1"></i>26 Alta
+            <i class="bi bi-graph-up-arrow me-1"></i>23 Alta
           </span>
           <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-2">
-            <i class="bi bi-gem me-1"></i>28 Value Bets
+            <i class="bi bi-gem me-1"></i>25 Value Bets
           </span>
           <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-2">
-            <i class="bi bi-speedometer2 me-1"></i>Conf. prom: 49.1%
+            <i class="bi bi-speedometer2 me-1"></i>Conf. prom: 48.6%
           </span>
         </div>
       </div>
       <div class="col-lg-5 d-none d-lg-block">
         <div class="row g-3">
-          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-calendar-event mb-2" style="font-size:1.4rem;color:#1A5C96"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#1A5C96">94</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Partidos</div></div></div>
-          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-trophy-fill mb-2" style="font-size:1.4rem;color:#92720A"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#92720A">12</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Élite</div></div></div>
-          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-graph-up-arrow mb-2" style="font-size:1.4rem;color:#1A5C96"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#1A5C96">26</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Alta</div></div></div>
-          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-gem mb-2" style="font-size:1.4rem;color:#92720A"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#92720A">28</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Value Bets</div></div></div>
-          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-speedometer2 mb-2" style="font-size:1.4rem;color:#1A7A60"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#1A7A60">49.1%</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Confianza</div></div></div>
-          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-globe mb-2" style="font-size:1.4rem;color:#6A7A8A"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#6A7A8A">53</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Ligas</div></div></div>
+          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-calendar-event mb-2" style="font-size:1.4rem;color:#1A5C96"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#1A5C96">88</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Partidos</div></div></div>
+          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-trophy-fill mb-2" style="font-size:1.4rem;color:#92720A"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#92720A">11</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Élite</div></div></div>
+          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-graph-up-arrow mb-2" style="font-size:1.4rem;color:#1A5C96"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#1A5C96">23</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Alta</div></div></div>
+          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-gem mb-2" style="font-size:1.4rem;color:#92720A"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#92720A">25</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Value Bets</div></div></div>
+          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-speedometer2 mb-2" style="font-size:1.4rem;color:#1A7A60"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#1A7A60">48.6%</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Confianza</div></div></div>
+          <div class="col"><div class="card border-0 shadow-sm text-center py-3 px-2 h-100"><i class="bi bi-globe mb-2" style="font-size:1.4rem;color:#6A7A8A"></i><div class="fw-black mb-1" style="font-size:1.5rem;color:#6A7A8A">51</div><div class="text-uppercase text-muted" style="font-size:10px;letter-spacing:1px">Ligas</div></div></div>
         </div>
       </div>
     </div>
@@ -259,8 +223,6 @@
 
 <!-- MAIN -->
 <div class="container-xl py-4">
-
-  <!-- Filtros -->
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
     <div class="small fw-bold text-uppercase d-flex align-items-center gap-2" style="letter-spacing:2px;color:var(--gold)">
       <span style="display:inline-block;width:3px;height:16px;background:var(--gold);border-radius:2px"></span>
@@ -282,15 +244,13 @@
     </div>
   </div>
 
-  <!-- Chips ligas -->
   <div class="d-flex flex-wrap gap-2 mb-4" id="comp-chips">
     <button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill active" data-comp="ALL">
       <i class="bi bi-globe me-1"></i>Todas las ligas
     </button>
-    <button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ALEMANIA – 2. BUNDESLIGA">ALEMANIA – 2. BUNDESLIGA</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ALEMANIA – BUNDESLIGA">ALEMANIA – BUNDESLIGA</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="AUSTRIA – 2. LIGA">AUSTRIA – 2. LIGA</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="BRASIL – CATARINENSE PLAYOFF">BRASIL – CATARINENSE PLAYOFF</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="CHIPRE – 2. DIVISION PROMOTION GROUP">CHIPRE – 2. DIVISION PROMOTION GROUP</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="CHIPRE – CHIPRE LEAGUE">CHIPRE – CHIPRE LEAGUE</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="DINAMARCA – 2. DIVISION">DINAMARCA – 2. DIVISION</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="EGIPTO – 1. DIVISION">EGIPTO – 1. DIVISION</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ESCOCIA – FA CUP">ESCOCIA – FA CUP</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ESLOVAQUIA – 2. LIGA">ESLOVAQUIA – 2. LIGA</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ESPAÑA – PRIMERA FEDERACION – GROUP 2">ESPAÑA – PRIMERA FEDERACION – GROUP 2</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="FRANCIA – LIGUE 1">FRANCIA – LIGUE 1</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="FRANCIA – NATIONAL">FRANCIA – NATIONAL</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="FRANCIA – NATIONAL 2 GRP. C">FRANCIA – NATIONAL 2 GRP. C</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ITALIA – SERIE A">ITALIA – SERIE A</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="PORTUGAL – LIGA PORTUGAL">PORTUGAL – LIGA PORTUGAL</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="REP. OF IRLANDA – FIRST DIVISION">REP. OF IRLANDA – FIRST DIVISION</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="REP. OF IRLANDA – PREMIER DIVISION">REP. OF IRLANDA – PREMIER DIVISION</button>
+    <button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ALEMANIA – 2. BUNDESLIGA">ALEMANIA – 2. BUNDESLIGA</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ALEMANIA – BUNDESLIGA">ALEMANIA – BUNDESLIGA</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="AUSTRIA – 2. LIGA">AUSTRIA – 2. LIGA</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="BRASIL – CATARINENSE PLAYOFF">BRASIL – CATARINENSE PLAYOFF</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="CHIPRE – 2. DIVISION PROMOTION GROUP">CHIPRE – 2. DIVISION PROMOTION GROUP</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="CHIPRE – CHIPRE LEAGUE">CHIPRE – CHIPRE LEAGUE</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="DINAMARCA – 2. DIVISION">DINAMARCA – 2. DIVISION</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="EGIPTO – 1. DIVISION">EGIPTO – 1. DIVISION</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ESCOCIA – FA CUP">ESCOCIA – FA CUP</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ESPAÑA – PRIMERA FEDERACION – GROUP 2">ESPAÑA – PRIMERA FEDERACION – GROUP 2</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="FRANCIA – LIGUE 1">FRANCIA – LIGUE 1</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="FRANCIA – NATIONAL">FRANCIA – NATIONAL</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="FRANCIA – NATIONAL 2 GRP. C">FRANCIA – NATIONAL 2 GRP. C</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="INGLATERRA – CHAMPIONSHIP">INGLATERRA – CHAMPIONSHIP</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="INGLATERRA – FA CUP">INGLATERRA – FA CUP</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="ITALIA – SERIE A">ITALIA – SERIE A</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="PORTUGAL – LIGA PORTUGAL">PORTUGAL – LIGA PORTUGAL</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="REP. OF IRLANDA – FIRST DIVISION">REP. OF IRLANDA – FIRST DIVISION</button><button class="btn btn-sm btn-outline-secondary comp-chip rounded-pill" data-comp="REP. OF IRLANDA – PREMIER DIVISION">REP. OF IRLANDA – PREMIER DIVISION</button>
   </div>
 
-  <!-- Cards -->
   <div id="cards">
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ELITE"
   data-comp="ALEMANIA – BUNDESLIGA"
@@ -434,6 +394,32 @@
     
         <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-lightning-charge-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Club Elo — Fuerza histórica</span></div>
         
+        <div class="mb-3">
+          <div class="d-flex align-items-center gap-1 mb-1">
+            <span class="small text-muted fw-semibold">Probabilidades según Elo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size:9px">CLUBELO</span>
+          </div>
+          <div class="row g-1 text-center">
+            <div class="col-4">
+              <div class="p-2 rounded bg-success-subtle border border-success-subtle">
+                <div class="text-muted" style="font-size:11px">LOCAL</div>
+                <div class="fw-bold text-success" style="font-size:1.1rem">87.8%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">EMPATE</div>
+                <div class="fw-bold" style="font-size:1.1rem">8.7%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">VISITA</div>
+                <div class="fw-bold " style="font-size:1.1rem">3.5%</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="row g-2 mb-2">
           <div class="col-6">
             <div class="card border-0 bg-light text-center py-3">
@@ -452,6 +438,7 @@
         </div>
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-arrows-expand-vertical'></i> Diferencia</span><span class="fw-bold text-warning-emphasis small">+370 pts</span></div>
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">LOCAL</span></div>
+    
     
     
 
@@ -626,6 +613,7 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">—</span></div>
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -798,6 +786,7 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">—</span></div>
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -947,6 +936,7 @@
       <div class="col"><div class="text-center p-2 rounded-3 border h-100" style="background:#E8A02015;border-color:#E8A02050!important"><div class="fw-bold small mb-1" style="color:#E8A020">BTTS No</div><div class="fw-black" style="font-size:1.4rem;color:#E8A020">63%</div></div></div>
     </div>
 
+    
     
     
     
@@ -1102,6 +1092,7 @@
     
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -1251,6 +1242,7 @@
       <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">BTTS No</div><div class="fw-bold text-secondary" style="font-size:1.4rem">47%</div></div></div>
     </div>
 
+    
     
     
     
@@ -1406,177 +1398,6 @@
     
     
     
-
-    <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
-      <div class="small text-muted" style="line-height:1.6">
-        <i class="bi bi-info-circle me-1"></i>
-        Score = prob. victoria (60%) + margen (40%) + claridad pick (20%) ± Elo ± BetPlay.<br>
-        Solo fines informativos. No constituye consejo de apuestas.
-      </div>
-    </div>
-  </div>
-</div>
-<div class="card mb-2 border-0 shadow-sm card-match" data-tier="ELITE"
-  data-comp="ESLOVAQUIA – 2. LIGA"
-  style="border-left:4px solid #D4AA3A!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m8">
-  <div class="card-body p-0">
-    <div class="row g-0 align-items-stretch">
-
-      <!-- LEFT: rank + ring + pick -->
-      <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
-        style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">8</span>
-        <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#92720A" stroke-width="3" stroke-dasharray="98.0 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#92720A" font-size="10" font-weight="700" font-family='Sora,sans-serif'>78</text></svg>
-        <span class="badge px-2 py-1 fw-bold" style="background:#92720A18;color:#92720A;border:1px solid #92720A40;font-size:11px">1</span>
-      </div>
-
-      <!-- CENTER: info -->
-      <div class="col py-3 px-3" style="min-width:0">
-        <div class="d-flex align-items-center flex-wrap gap-1 mb-2">
-          <span class="badge bg-warning text-dark">
-            <i class="bi bi-trophy-fill me-1"></i>ÉLITE
-          </span>
-          <span class="badge bg-warning text-dark small"><i class="bi bi-gem me-1"></i>VALUE</span>
-          <span class="text-muted small text-truncate" style="max-width:250px">
-            <i class="bi bi-geo-alt me-1"></i>ESLOVAQUIA – 2. LIGA
-          </span>
-          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>12:00 COL</span>
-        </div>
-        <div class="fw-black text-truncate mb-1" style="font-size:1rem;color:#92720A">– Dukla Banska Bystrica</div>
-        <div class="text-muted small text-truncate mb-1">– Dukla Banska Bystrica – MSK Povazska Bystrica</div>
-        <div class="fst-italic text-secondary text-truncate mb-2" style="font-size:12px">1 – equipo local a ganar</div>
-        <div class="d-flex flex-wrap gap-1">
-          
-          <span class="badge bg-light text-secondary border small">+2.5: 58%</span>
-          <span class="badge bg-light text-secondary border small">BTTS: 52%</span>
-          <span class="badge bg-light text-muted border small">
-            <i class="bi bi-chevron-right"></i> ver detalles
-          </span>
-        </div>
-      </div>
-
-      <!-- RIGHT: prob bars -->
-      <div class="col-auto d-none d-md-flex flex-column justify-content-center px-3 py-3"
-        style="min-width:180px;background:#F8F9FB;border-left:1px solid #E8EDF3">
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">1</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar" style="width:63%;background:#92720A"></div>
-          </div>
-          <span class="small fw-bold" style="width:36px;text-align:right;color:#92720A">63%</span>
-        </div>
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">X</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar bg-secondary" style="width:24%;opacity:.4"></div>
-          </div>
-          <span class="small text-muted" style="width:36px;text-align:right">24%</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">2</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar" style="width:13%;background:#D0D8E4"></div>
-          </div>
-          <span class="small fw-normal" style="width:36px;text-align:right;color:#8A9BAC">13%</span>
-        </div>
-        <div class="text-end mt-2">
-          <span class="badge bg-light text-muted border" style="font-size:10px">+50pts ventaja</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m8" style="width:min(600px,100vw)">
-  <div class="offcanvas-header border-bottom" style="border-left:4px solid #92720A">
-    <div class="flex-grow-1 min-width-0">
-      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-        <span class="badge bg-warning text-dark">
-          <i class="bi bi-trophy-fill me-1"></i>ÉLITE
-        </span>
-        <span class="badge bg-warning text-dark ms-1"><i class="bi bi-gem me-1"></i>VALUE BET</span>
-        <span class="text-muted small"><i class="bi bi-trophy me-1"></i>ESLOVAQUIA – 2. LIGA</span>
-        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>12:00 COL</span>
-      </div>
-      <h5 class="mb-1 fw-black" style="color:#92720A">– Dukla Banska Bystrica</h5>
-      <div class="text-muted small">– Dukla Banska Bystrica – MSK Povazska Bystrica</div>
-      <div class="fst-italic text-secondary" style="font-size:12px">1 – equipo local a ganar</div>
-    </div>
-    <button type="button" class="btn-close ms-3" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body">
-
-    <!-- KPIs -->
-    <div class="row g-3 mb-1">
-      <div class="col-4">
-        <div class="card border-0 text-center py-3" style="background:#FBF5E0;border:1px solid #D4AA3A!important">
-          <div class="small fw-bold mb-1" style="color:#92720A;letter-spacing:1px">CONFIANZA</div>
-          <div style="font-size:2rem;font-weight:900;color:#92720A;line-height:1">78<span style="font-size:1rem">%</span></div>
-        </div>
-      </div>
-      <div class="col-4">
-        <div class="card border-0 bg-light text-center py-3">
-          <div class="small fw-bold text-muted mb-1" style="letter-spacing:1px">PICK</div>
-          <div style="font-size:2rem;font-weight:900;color:#92720A;line-height:1">1</div>
-        </div>
-      </div>
-      <div class="col-4">
-        <div class="card border-0 bg-light text-center py-3">
-          <div class="small fw-bold text-muted mb-1" style="letter-spacing:1px">VENTAJA</div>
-          <div style="font-size:2rem;font-weight:900;line-height:1">+50<span style="font-size:1rem">pts</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 1X2 -->
-    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bar-chart-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Probabilidades de resultado</span></div>
-    <div class="row g-2 mb-1">
-      <div class="col-4"><div class="text-center p-2 rounded-3 border h-100" style="background:#92720A15;border-color:#92720A50!important"><div class="fw-bold small mb-1" style="color:#92720A">LOCAL (1)</div><div class="fw-black" style="font-size:1.4rem;color:#92720A">63%</div></div></div>
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">EMPATE (X)</div><div class="fw-bold text-secondary" style="font-size:1.4rem">24%</div></div></div>
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">VISITA (2)</div><div class="fw-bold text-secondary" style="font-size:1.4rem">13%</div></div></div>
-    </div>
-
-    <!-- HT -->
-    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-hourglass-split text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Medio tiempo</span></div>
-    <div class="row g-2 mb-1">
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Local</div><div class="fw-bold text-secondary" style="font-size:1.4rem">44%</div></div></div>
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Empate</div><div class="fw-bold text-secondary" style="font-size:1.4rem">44%</div></div></div>
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Visita</div><div class="fw-bold text-secondary" style="font-size:1.4rem">12%</div></div></div>
-    </div>
-
-    <!-- Goles -->
-    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bullseye text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Mercado de goles</span></div>
-    <div class="row g-2 mb-1">
-      <div class="col"><div class="text-center p-2 rounded-3 border h-100" style="background:#22A86E15;border-color:#22A86E50!important"><div class="fw-bold small mb-1" style="color:#22A86E">+1.5</div><div class="fw-black" style="font-size:1.4rem;color:#22A86E">88%</div></div></div>
-      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">+2.5</div><div class="fw-bold text-secondary" style="font-size:1.4rem">58%</div></div></div>
-      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">+3.5</div><div class="fw-bold text-secondary" style="font-size:1.4rem">38%</div></div></div>
-      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">BTTS Sí</div><div class="fw-bold text-secondary" style="font-size:1.4rem">52%</div></div></div>
-      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">BTTS No</div><div class="fw-bold text-secondary" style="font-size:1.4rem">48%</div></div></div>
-    </div>
-
-    
-        <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-lightning-charge-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Club Elo — Fuerza histórica</span></div>
-        
-        <div class="row g-2 mb-2">
-          <div class="col-6">
-            <div class="card border-0 bg-light text-center py-3">
-              <div class="text-muted small mb-1">– Dukla Banska Bystrica</div>
-              <div class="fw-black" style="font-size:1.8rem">1260</div>
-              <div class="badge bg-secondary-subtle text-secondary-emphasis">ELO</div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="card border-0 bg-light text-center py-3">
-              <div class="text-muted small mb-1">MSK Povazska Bystrica</div>
-              <div class="fw-black" style="font-size:1.8rem">—</div>
-              <div class="badge bg-secondary-subtle text-secondary-emphasis">ELO</div>
-            </div>
-          </div>
-        </div>
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-arrows-expand-vertical'></i> Diferencia</span><span class="fw-semibold small">— pts</span></div>
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">—</span></div>
-    
     
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
@@ -1591,14 +1412,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ELITE"
   data-comp="CHIPRE – 2. DIVISION PROMOTION GROUP"
   style="border-left:4px solid #D4AA3A!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m9">
+  data-bs-toggle="offcanvas" data-bs-target="#m8">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">9</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">8</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#92720A" stroke-width="3" stroke-dasharray="95.5 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#92720A" font-size="10" font-weight="700" font-family='Sora,sans-serif'>76</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#92720A18;color:#92720A;border:1px solid #92720A40;font-size:11px">2</span>
       </div>
@@ -1660,7 +1481,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m9" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m8" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #92720A">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -1750,6 +1571,7 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">—</span></div>
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -1763,14 +1585,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ELITE"
   data-comp="EGIPTO – 1. DIVISION"
   style="border-left:4px solid #D4AA3A!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m10">
+  data-bs-toggle="offcanvas" data-bs-target="#m9">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">10</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">9</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#92720A" stroke-width="3" stroke-dasharray="95.5 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#92720A" font-size="10" font-weight="700" font-family='Sora,sans-serif'>76</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#92720A18;color:#92720A;border:1px solid #92720A40;font-size:11px">1</span>
       </div>
@@ -1832,7 +1654,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m10" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m9" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #92720A">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -1902,6 +1724,7 @@
     
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -1915,14 +1738,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ELITE"
   data-comp="ITALIA – SERIE A"
   style="border-left:4px solid #D4AA3A!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m11">
+  data-bs-toggle="offcanvas" data-bs-target="#m10">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">11</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">10</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#92720A" stroke-width="3" stroke-dasharray="89.2 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#92720A" font-size="10" font-weight="700" font-family='Sora,sans-serif'>71</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#92720A18;color:#92720A;border:1px solid #92720A40;font-size:11px">1X</span>
       </div>
@@ -1984,7 +1807,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m11" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m10" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #92720A">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -2054,6 +1877,32 @@
     
         <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-lightning-charge-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Club Elo — Fuerza histórica</span></div>
         
+        <div class="mb-3">
+          <div class="d-flex align-items-center gap-1 mb-1">
+            <span class="small text-muted fw-semibold">Probabilidades según Elo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size:9px">CLUBELO</span>
+          </div>
+          <div class="row g-1 text-center">
+            <div class="col-4">
+              <div class="p-2 rounded bg-success-subtle border border-success-subtle">
+                <div class="text-muted" style="font-size:11px">LOCAL</div>
+                <div class="fw-bold text-success" style="font-size:1.1rem">61.5%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">EMPATE</div>
+                <div class="fw-bold" style="font-size:1.1rem">22.4%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">VISITA</div>
+                <div class="fw-bold " style="font-size:1.1rem">16.0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="row g-2 mb-2">
           <div class="col-6">
             <div class="card border-0 bg-light text-center py-3">
@@ -2073,6 +1922,28 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-arrows-expand-vertical'></i> Diferencia</span><span class="fw-bold text-warning-emphasis small">+172 pts</span></div>
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">LOCAL</span></div>
     
+        <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bar-chart-steps text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Últimos 5 partidos — Forma reciente</span></div>
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="fw-semibold small mb-2 text-truncate">– Napoli</div>
+            <table class="table table-sm mb-0" style="font-size:12px">
+              <thead class="table-light"><tr>
+                <th>Res</th><th>Fecha</th><th class="text-end">Δ Elo</th><th class="text-end">Elo</th>
+              </tr></thead>
+              <tbody><tr><td colspan="4" class="text-muted small">Sin datos</td></tr></tbody>
+            </table>
+          </div>
+          <div class="col-6">
+            <div class="fw-semibold small mb-2 text-truncate">Torino</div>
+            <table class="table table-sm mb-0" style="font-size:12px">
+              <thead class="table-light"><tr>
+                <th>Res</th><th>Fecha</th><th class="text-end">Δ Elo</th><th class="text-end">Elo</th>
+              </tr></thead>
+              <tbody><tr><td><span class="badge rounded-pill" style="background:#198754;min-width:28px">V</span></td><td class="text-muted small">2026-03-02</td><td class="text-end small fw-semibold" style="color:#198754">+13.8</td><td class="text-end small text-muted">1615</td></tr><tr><td><span class="badge rounded-pill" style="background:#6c757d;min-width:28px">E</span></td><td class="text-muted small">2026-02-26</td><td class="text-end small fw-semibold" style="color:#6c757d">+4.7</td><td class="text-end small text-muted">1602</td></tr><tr><td><span class="badge rounded-pill" style="background:#dc3545;min-width:28px">D</span></td><td class="text-muted small">2026-02-25</td><td class="text-end small fw-semibold" style="color:#dc3545">-7.1</td><td class="text-end small text-muted">1597</td></tr><tr><td><span class="badge rounded-pill" style="background:#dc3545;min-width:28px">D</span></td><td class="text-muted small">2026-02-23</td><td class="text-end small fw-semibold" style="color:#dc3545">-12.4</td><td class="text-end small text-muted">1604</td></tr><tr><td><span class="badge rounded-pill" style="background:#6c757d;min-width:28px">E</span></td><td class="text-muted small">2026-02-20</td><td class="text-end small fw-semibold" style="color:#6c757d">+3.4</td><td class="text-end small text-muted">1616</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+    
     
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
@@ -2087,14 +1958,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ELITE"
   data-comp="ALEMANIA – 2. BUNDESLIGA"
   style="border-left:4px solid #D4AA3A!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m12">
+  data-bs-toggle="offcanvas" data-bs-target="#m11">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">12</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">11</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#92720A" stroke-width="3" stroke-dasharray="81.7 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#92720A" font-size="10" font-weight="700" font-family='Sora,sans-serif'>65</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#92720A18;color:#92720A;border:1px solid #92720A40;font-size:11px">1X</span>
       </div>
@@ -2156,7 +2027,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m12" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m11" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #92720A">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -2226,6 +2097,32 @@
     
         <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-lightning-charge-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Club Elo — Fuerza histórica</span></div>
         
+        <div class="mb-3">
+          <div class="d-flex align-items-center gap-1 mb-1">
+            <span class="small text-muted fw-semibold">Probabilidades según Elo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size:9px">CLUBELO</span>
+          </div>
+          <div class="row g-1 text-center">
+            <div class="col-4">
+              <div class="p-2 rounded bg-success-subtle border border-success-subtle">
+                <div class="text-muted" style="font-size:11px">LOCAL</div>
+                <div class="fw-bold text-success" style="font-size:1.1rem">54.2%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">EMPATE</div>
+                <div class="fw-bold" style="font-size:1.1rem">26.2%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">VISITA</div>
+                <div class="fw-bold " style="font-size:1.1rem">19.6%</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="row g-2 mb-2">
           <div class="col-6">
             <div class="card border-0 bg-light text-center py-3">
@@ -2246,6 +2143,7 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">LOCAL</span></div>
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -2259,14 +2157,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
   data-comp="REP. OF IRLANDA – FIRST DIVISION"
   style="border-left:4px solid #4A9BE8!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m13">
+  data-bs-toggle="offcanvas" data-bs-target="#m12">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">13</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">12</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="76.7 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>61</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">UNK</span>
       </div>
@@ -2328,7 +2226,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m13" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m12" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -2398,6 +2296,7 @@
     
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -2411,14 +2310,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
   data-comp="PORTUGAL – LIGA PORTUGAL"
   style="border-left:4px solid #4A9BE8!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m14">
+  data-bs-toggle="offcanvas" data-bs-target="#m13">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">14</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">13</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="76.7 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>61</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">1X</span>
       </div>
@@ -2480,7 +2379,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m14" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m13" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -2550,6 +2449,32 @@
     
         <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-lightning-charge-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Club Elo — Fuerza histórica</span></div>
         
+        <div class="mb-3">
+          <div class="d-flex align-items-center gap-1 mb-1">
+            <span class="small text-muted fw-semibold">Probabilidades según Elo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size:9px">CLUBELO</span>
+          </div>
+          <div class="row g-1 text-center">
+            <div class="col-4">
+              <div class="p-2 rounded bg-success-subtle border border-success-subtle">
+                <div class="text-muted" style="font-size:11px">LOCAL</div>
+                <div class="fw-bold text-success" style="font-size:1.1rem">51.4%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">EMPATE</div>
+                <div class="fw-bold" style="font-size:1.1rem">25.8%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">VISITA</div>
+                <div class="fw-bold " style="font-size:1.1rem">22.8%</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="row g-2 mb-2">
           <div class="col-6">
             <div class="card border-0 bg-light text-center py-3">
@@ -2566,8 +2491,30 @@
             </div>
           </div>
         </div>
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-arrows-expand-vertical'></i> Diferencia</span><span class="fw-bold text-warning-emphasis small">+73 pts</span></div>
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-arrows-expand-vertical'></i> Diferencia</span><span class="fw-bold text-warning-emphasis small">+72 pts</span></div>
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">LOCAL</span></div>
+    
+        <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bar-chart-steps text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Últimos 5 partidos — Forma reciente</span></div>
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="fw-semibold small mb-2 text-truncate">– Famalicao</div>
+            <table class="table table-sm mb-0" style="font-size:12px">
+              <thead class="table-light"><tr>
+                <th>Res</th><th>Fecha</th><th class="text-end">Δ Elo</th><th class="text-end">Elo</th>
+              </tr></thead>
+              <tbody><tr><td colspan="4" class="text-muted small">Sin datos</td></tr></tbody>
+            </table>
+          </div>
+          <div class="col-6">
+            <div class="fw-semibold small mb-2 text-truncate">Arouca</div>
+            <table class="table table-sm mb-0" style="font-size:12px">
+              <thead class="table-light"><tr>
+                <th>Res</th><th>Fecha</th><th class="text-end">Δ Elo</th><th class="text-end">Elo</th>
+              </tr></thead>
+              <tbody><tr><td><span class="badge rounded-pill" style="background:#198754;min-width:28px">V</span></td><td class="text-muted small">2026-02-22</td><td class="text-end small fw-semibold" style="color:#198754">+10.6</td><td class="text-end small text-muted">1470</td></tr><tr><td><span class="badge rounded-pill" style="background:#dc3545;min-width:28px">D</span></td><td class="text-muted small">2026-02-15</td><td class="text-end small fw-semibold" style="color:#dc3545">-7.5</td><td class="text-end small text-muted">1462</td></tr><tr><td><span class="badge rounded-pill" style="background:#198754;min-width:28px">V</span></td><td class="text-muted small">2026-02-08</td><td class="text-end small fw-semibold" style="color:#198754">+9.3</td><td class="text-end small text-muted">1469</td></tr><tr><td><span class="badge rounded-pill" style="background:#198754;min-width:28px">V</span></td><td class="text-muted small">2026-02-01</td><td class="text-end small fw-semibold" style="color:#198754">+16.4</td><td class="text-end small text-muted">1460</td></tr><tr><td><span class="badge rounded-pill" style="background:#198754;min-width:28px">V</span></td><td class="text-muted small">2026-01-29</td><td class="text-end small fw-semibold" style="color:#198754">+7.2</td><td class="text-end small text-muted">1444</td></tr></tbody>
+            </table>
+          </div>
+        </div>
     
     
 
@@ -2583,14 +2530,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
   data-comp="ESCOCIA – FA CUP"
   style="border-left:4px solid #4A9BE8!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m15">
+  data-bs-toggle="offcanvas" data-bs-target="#m14">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">15</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">14</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="76.7 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>61</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">1X</span>
       </div>
@@ -2652,7 +2599,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m15" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m14" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -2742,6 +2689,7 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">LOCAL</span></div>
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -2755,14 +2703,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
   data-comp="FRANCIA – NATIONAL"
   style="border-left:4px solid #4A9BE8!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m16">
+  data-bs-toggle="offcanvas" data-bs-target="#m15">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">16</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">15</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="75.4 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>60</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">X2</span>
       </div>
@@ -2824,7 +2772,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m16" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m15" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -2894,6 +2842,7 @@
     
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -2907,14 +2856,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
   data-comp="AUSTRIA – 2. LIGA"
   style="border-left:4px solid #4A9BE8!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m17">
+  data-bs-toggle="offcanvas" data-bs-target="#m16">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">17</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">16</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="74.1 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>59</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">UNK</span>
       </div>
@@ -2976,7 +2925,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m17" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m16" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -3046,6 +2995,7 @@
     
     
     
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -3059,14 +3009,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
   data-comp="REP. OF IRLANDA – PREMIER DIVISION"
   style="border-left:4px solid #4A9BE8!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m18">
+  data-bs-toggle="offcanvas" data-bs-target="#m17">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">18</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">17</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="74.1 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>59</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">X2</span>
       </div>
@@ -3128,7 +3078,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m18" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m17" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -3218,177 +3168,6 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">—</span></div>
     
     
-
-    <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
-      <div class="small text-muted" style="line-height:1.6">
-        <i class="bi bi-info-circle me-1"></i>
-        Score = prob. victoria (60%) + margen (40%) + claridad pick (20%) ± Elo ± BetPlay.<br>
-        Solo fines informativos. No constituye consejo de apuestas.
-      </div>
-    </div>
-  </div>
-</div>
-<div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
-  data-comp="ESPAÑA – PRIMERA FEDERACION – GROUP 2"
-  style="border-left:4px solid #4A9BE8!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m19">
-  <div class="card-body p-0">
-    <div class="row g-0 align-items-stretch">
-
-      <!-- LEFT: rank + ring + pick -->
-      <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
-        style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">19</span>
-        <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="74.1 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>59</text></svg>
-        <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">1X</span>
-      </div>
-
-      <!-- CENTER: info -->
-      <div class="col py-3 px-3" style="min-width:0">
-        <div class="d-flex align-items-center flex-wrap gap-1 mb-2">
-          <span class="badge bg-primary text-dark">
-            <i class="bi bi-graph-up-arrow me-1"></i>ALTA
-          </span>
-          <span class="badge bg-warning text-dark small"><i class="bi bi-gem me-1"></i>VALUE</span>
-          <span class="text-muted small text-truncate" style="max-width:250px">
-            <i class="bi bi-geo-alt me-1"></i>ESPAÑA – PRIMERA FEDERACION – GROUP 2
-          </span>
-          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>16:15 COL</span>
-        </div>
-        <div class="fw-black text-truncate mb-1" style="font-size:1rem;color:#1A5C96">– Betis Deportivo Balompie</div>
-        <div class="text-muted small text-truncate mb-1">– Betis Deportivo Balompie – Sevilla Atletico</div>
-        <div class="fst-italic text-secondary text-truncate mb-2" style="font-size:12px">1X – doble oportunidad</div>
-        <div class="d-flex flex-wrap gap-1">
-          <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle small"><i class="bi bi-lightning-charge me-1"></i>Elo: LOCAL</span>
-          <span class="badge bg-light text-secondary border small">+2.5: 39%</span>
-          <span class="badge bg-light text-secondary border small">BTTS: 38%</span>
-          <span class="badge bg-light text-muted border small">
-            <i class="bi bi-chevron-right"></i> ver detalles
-          </span>
-        </div>
-      </div>
-
-      <!-- RIGHT: prob bars -->
-      <div class="col-auto d-none d-md-flex flex-column justify-content-center px-3 py-3"
-        style="min-width:180px;background:#F8F9FB;border-left:1px solid #E8EDF3">
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">1</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar" style="width:50%;background:#1A5C96"></div>
-          </div>
-          <span class="small fw-bold" style="width:36px;text-align:right;color:#1A5C96">50%</span>
-        </div>
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">X</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar bg-secondary" style="width:27%;opacity:.4"></div>
-          </div>
-          <span class="small text-muted" style="width:36px;text-align:right">27%</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">2</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar" style="width:23%;background:#D0D8E4"></div>
-          </div>
-          <span class="small fw-normal" style="width:36px;text-align:right;color:#8A9BAC">23%</span>
-        </div>
-        <div class="text-end mt-2">
-          <span class="badge bg-light text-muted border" style="font-size:10px">+27pts ventaja</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m19" style="width:min(600px,100vw)">
-  <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
-    <div class="flex-grow-1 min-width-0">
-      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-        <span class="badge bg-primary text-dark">
-          <i class="bi bi-graph-up-arrow me-1"></i>ALTA
-        </span>
-        <span class="badge bg-warning text-dark ms-1"><i class="bi bi-gem me-1"></i>VALUE BET</span>
-        <span class="text-muted small"><i class="bi bi-trophy me-1"></i>ESPAÑA – PRIMERA FEDERACION – GROUP 2</span>
-        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>16:15 COL</span>
-      </div>
-      <h5 class="mb-1 fw-black" style="color:#1A5C96">– Betis Deportivo Balompie</h5>
-      <div class="text-muted small">– Betis Deportivo Balompie – Sevilla Atletico</div>
-      <div class="fst-italic text-secondary" style="font-size:12px">1X – doble oportunidad</div>
-    </div>
-    <button type="button" class="btn-close ms-3" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body">
-
-    <!-- KPIs -->
-    <div class="row g-3 mb-1">
-      <div class="col-4">
-        <div class="card border-0 text-center py-3" style="background:#EBF4FF;border:1px solid #4A9BE8!important">
-          <div class="small fw-bold mb-1" style="color:#1A5C96;letter-spacing:1px">CONFIANZA</div>
-          <div style="font-size:2rem;font-weight:900;color:#1A5C96;line-height:1">59<span style="font-size:1rem">%</span></div>
-        </div>
-      </div>
-      <div class="col-4">
-        <div class="card border-0 bg-light text-center py-3">
-          <div class="small fw-bold text-muted mb-1" style="letter-spacing:1px">PICK</div>
-          <div style="font-size:2rem;font-weight:900;color:#1A5C96;line-height:1">1X</div>
-        </div>
-      </div>
-      <div class="col-4">
-        <div class="card border-0 bg-light text-center py-3">
-          <div class="small fw-bold text-muted mb-1" style="letter-spacing:1px">VENTAJA</div>
-          <div style="font-size:2rem;font-weight:900;line-height:1">+27<span style="font-size:1rem">pts</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 1X2 -->
-    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bar-chart-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Probabilidades de resultado</span></div>
-    <div class="row g-2 mb-1">
-      <div class="col-4"><div class="text-center p-2 rounded-3 border h-100" style="background:#1A5C9615;border-color:#1A5C9650!important"><div class="fw-bold small mb-1" style="color:#1A5C96">LOCAL (1)</div><div class="fw-black" style="font-size:1.4rem;color:#1A5C96">50%</div></div></div>
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">EMPATE (X)</div><div class="fw-bold text-secondary" style="font-size:1.4rem">27%</div></div></div>
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">VISITA (2)</div><div class="fw-bold text-secondary" style="font-size:1.4rem">23%</div></div></div>
-    </div>
-
-    <!-- HT -->
-    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-hourglass-split text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Medio tiempo</span></div>
-    <div class="row g-2 mb-1">
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Local</div><div class="fw-bold text-secondary" style="font-size:1.4rem">24%</div></div></div>
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Empate</div><div class="fw-bold text-secondary" style="font-size:1.4rem">61%</div></div></div>
-      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Visita</div><div class="fw-bold text-secondary" style="font-size:1.4rem">15%</div></div></div>
-    </div>
-
-    <!-- Goles -->
-    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bullseye text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Mercado de goles</span></div>
-    <div class="row g-2 mb-1">
-      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">+1.5</div><div class="fw-bold text-secondary" style="font-size:1.4rem">62%</div></div></div>
-      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">+2.5</div><div class="fw-bold text-secondary" style="font-size:1.4rem">39%</div></div></div>
-      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">+3.5</div><div class="fw-bold text-secondary" style="font-size:1.4rem">19%</div></div></div>
-      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">BTTS Sí</div><div class="fw-bold text-secondary" style="font-size:1.4rem">38%</div></div></div>
-      <div class="col"><div class="text-center p-2 rounded-3 border h-100" style="background:#E8A02015;border-color:#E8A02050!important"><div class="fw-bold small mb-1" style="color:#E8A020">BTTS No</div><div class="fw-black" style="font-size:1.4rem;color:#E8A020">62%</div></div></div>
-    </div>
-
-    
-        <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-lightning-charge-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Club Elo — Fuerza histórica</span></div>
-        
-        <div class="row g-2 mb-2">
-          <div class="col-6">
-            <div class="card border-0 bg-light text-center py-3">
-              <div class="text-muted small mb-1">– Betis Deportivo Balompie</div>
-              <div class="fw-black" style="font-size:1.8rem">1751</div>
-              <div class="badge bg-secondary-subtle text-secondary-emphasis">ELO</div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="card border-0 bg-light text-center py-3">
-              <div class="text-muted small mb-1">Sevilla Atletico</div>
-              <div class="fw-black" style="font-size:1.8rem">1618</div>
-              <div class="badge bg-secondary-subtle text-secondary-emphasis">ELO</div>
-            </div>
-          </div>
-        </div>
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-arrows-expand-vertical'></i> Diferencia</span><span class="fw-bold text-warning-emphasis small">+133 pts</span></div>
-        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">LOCAL</span></div>
-    
     
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
@@ -3403,14 +3182,14 @@
 <div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
   data-comp="FRANCIA – LIGUE 1"
   style="border-left:4px solid #4A9BE8!important;cursor:pointer"
-  data-bs-toggle="offcanvas" data-bs-target="#m20">
+  data-bs-toggle="offcanvas" data-bs-target="#m18">
   <div class="card-body p-0">
     <div class="row g-0 align-items-stretch">
 
       <!-- LEFT: rank + ring + pick -->
       <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
         style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">20</span>
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">18</span>
         <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="72.9 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>58</text></svg>
         <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">UNK</span>
       </div>
@@ -3472,7 +3251,7 @@
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="m20" style="width:min(600px,100vw)">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m18" style="width:min(600px,100vw)">
   <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
@@ -3562,6 +3341,400 @@
         <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">VISITANTE</span></div>
     
     
+    
+
+    <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
+      <div class="small text-muted" style="line-height:1.6">
+        <i class="bi bi-info-circle me-1"></i>
+        Score = prob. victoria (60%) + margen (40%) + claridad pick (20%) ± Elo ± BetPlay.<br>
+        Solo fines informativos. No constituye consejo de apuestas.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
+  data-comp="INGLATERRA – FA CUP"
+  style="border-left:4px solid #4A9BE8!important;cursor:pointer"
+  data-bs-toggle="offcanvas" data-bs-target="#m19">
+  <div class="card-body p-0">
+    <div class="row g-0 align-items-stretch">
+
+      <!-- LEFT: rank + ring + pick -->
+      <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
+        style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">19</span>
+        <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="70.4 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>56</text></svg>
+        <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">UNK</span>
+      </div>
+
+      <!-- CENTER: info -->
+      <div class="col py-3 px-3" style="min-width:0">
+        <div class="d-flex align-items-center flex-wrap gap-1 mb-2">
+          <span class="badge bg-primary text-dark">
+            <i class="bi bi-graph-up-arrow me-1"></i>ALTA
+          </span>
+          <span class="badge bg-warning text-dark small"><i class="bi bi-gem me-1"></i>VALUE</span>
+          <span class="text-muted small text-truncate" style="max-width:250px">
+            <i class="bi bi-geo-alt me-1"></i>INGLATERRA – FA CUP
+          </span>
+          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>16:00 COL</span>
+        </div>
+        <div class="fw-black text-truncate mb-1" style="font-size:1rem;color:#1A5C96">Liverpool</div>
+        <div class="text-muted small text-truncate mb-1">– Wolves – Liverpool</div>
+        <div class="fst-italic text-secondary text-truncate mb-2" style="font-size:12px">más de 1.5 goles</div>
+        <div class="d-flex flex-wrap gap-1">
+          <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle small"><i class="bi bi-lightning-charge me-1"></i>Elo: VISITANTE</span>
+          <span class="badge bg-light text-secondary border small">+2.5: 69%</span>
+          <span class="badge bg-light text-secondary border small">BTTS: 55%</span>
+          <span class="badge bg-light text-muted border small">
+            <i class="bi bi-chevron-right"></i> ver detalles
+          </span>
+        </div>
+      </div>
+
+      <!-- RIGHT: prob bars -->
+      <div class="col-auto d-none d-md-flex flex-column justify-content-center px-3 py-3"
+        style="min-width:180px;background:#F8F9FB;border-left:1px solid #E8EDF3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="small fw-bold" style="width:14px;color:#8A9BAC">1</span>
+          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
+            <div class="progress-bar" style="width:18%;background:#D0D8E4"></div>
+          </div>
+          <span class="small fw-normal" style="width:36px;text-align:right;color:#8A9BAC">18%</span>
+        </div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="small fw-bold" style="width:14px;color:#8A9BAC">X</span>
+          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
+            <div class="progress-bar bg-secondary" style="width:25%;opacity:.4"></div>
+          </div>
+          <span class="small text-muted" style="width:36px;text-align:right">25%</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="small fw-bold" style="width:14px;color:#8A9BAC">2</span>
+          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
+            <div class="progress-bar" style="width:57%;background:#1A5C96"></div>
+          </div>
+          <span class="small fw-bold" style="width:36px;text-align:right;color:#1A5C96">57%</span>
+        </div>
+        <div class="text-end mt-2">
+          <span class="badge bg-light text-muted border" style="font-size:10px">+39pts ventaja</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m19" style="width:min(600px,100vw)">
+  <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
+    <div class="flex-grow-1 min-width-0">
+      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+        <span class="badge bg-primary text-dark">
+          <i class="bi bi-graph-up-arrow me-1"></i>ALTA
+        </span>
+        <span class="badge bg-warning text-dark ms-1"><i class="bi bi-gem me-1"></i>VALUE BET</span>
+        <span class="text-muted small"><i class="bi bi-trophy me-1"></i>INGLATERRA – FA CUP</span>
+        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>16:00 COL</span>
+      </div>
+      <h5 class="mb-1 fw-black" style="color:#1A5C96">Liverpool</h5>
+      <div class="text-muted small">– Wolves – Liverpool</div>
+      <div class="fst-italic text-secondary" style="font-size:12px">más de 1.5 goles</div>
+    </div>
+    <button type="button" class="btn-close ms-3" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-1">
+      <div class="col-4">
+        <div class="card border-0 text-center py-3" style="background:#EBF4FF;border:1px solid #4A9BE8!important">
+          <div class="small fw-bold mb-1" style="color:#1A5C96;letter-spacing:1px">CONFIANZA</div>
+          <div style="font-size:2rem;font-weight:900;color:#1A5C96;line-height:1">56<span style="font-size:1rem">%</span></div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-0 bg-light text-center py-3">
+          <div class="small fw-bold text-muted mb-1" style="letter-spacing:1px">PICK</div>
+          <div style="font-size:2rem;font-weight:900;color:#1A5C96;line-height:1">UNK</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-0 bg-light text-center py-3">
+          <div class="small fw-bold text-muted mb-1" style="letter-spacing:1px">VENTAJA</div>
+          <div style="font-size:2rem;font-weight:900;line-height:1">+39<span style="font-size:1rem">pts</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1X2 -->
+    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bar-chart-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Probabilidades de resultado</span></div>
+    <div class="row g-2 mb-1">
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">LOCAL (1)</div><div class="fw-bold text-secondary" style="font-size:1.4rem">18%</div></div></div>
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">EMPATE (X)</div><div class="fw-bold text-secondary" style="font-size:1.4rem">25%</div></div></div>
+      <div class="col-4"><div class="text-center p-2 rounded-3 border h-100" style="background:#1A5C9615;border-color:#1A5C9650!important"><div class="fw-bold small mb-1" style="color:#1A5C96">VISITA (2)</div><div class="fw-black" style="font-size:1.4rem;color:#1A5C96">57%</div></div></div>
+    </div>
+
+    <!-- HT -->
+    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-hourglass-split text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Medio tiempo</span></div>
+    <div class="row g-2 mb-1">
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Local</div><div class="fw-bold text-secondary" style="font-size:1.4rem">16%</div></div></div>
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Empate</div><div class="fw-bold text-secondary" style="font-size:1.4rem">41%</div></div></div>
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Visita</div><div class="fw-bold text-secondary" style="font-size:1.4rem">43%</div></div></div>
+    </div>
+
+    <!-- Goles -->
+    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bullseye text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Mercado de goles</span></div>
+    <div class="row g-2 mb-1">
+      <div class="col"><div class="text-center p-2 rounded-3 border h-100" style="background:#22A86E15;border-color:#22A86E50!important"><div class="fw-bold small mb-1" style="color:#22A86E">+1.5</div><div class="fw-black" style="font-size:1.4rem;color:#22A86E">89%</div></div></div>
+      <div class="col"><div class="text-center p-2 rounded-3 border h-100" style="background:#22A86E15;border-color:#22A86E50!important"><div class="fw-bold small mb-1" style="color:#22A86E">+2.5</div><div class="fw-black" style="font-size:1.4rem;color:#22A86E">69%</div></div></div>
+      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">+3.5</div><div class="fw-bold text-secondary" style="font-size:1.4rem">38%</div></div></div>
+      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">BTTS Sí</div><div class="fw-bold text-secondary" style="font-size:1.4rem">55%</div></div></div>
+      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">BTTS No</div><div class="fw-bold text-secondary" style="font-size:1.4rem">45%</div></div></div>
+    </div>
+
+    
+        <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-lightning-charge-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Club Elo — Fuerza histórica</span></div>
+        
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <div class="card border-0 bg-light text-center py-3">
+              <div class="text-muted small mb-1">– Wolves</div>
+              <div class="fw-black" style="font-size:1.8rem">1712</div>
+              <div class="badge bg-secondary-subtle text-secondary-emphasis">ELO</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card border-0 bg-light text-center py-3">
+              <div class="text-muted small mb-1">Liverpool</div>
+              <div class="fw-black" style="font-size:1.8rem">1952</div>
+              <div class="badge bg-secondary-subtle text-secondary-emphasis">ELO</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-arrows-expand-vertical'></i> Diferencia</span><span class="fw-bold text-warning-emphasis small">-239 pts</span></div>
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">VISITANTE</span></div>
+    
+        <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bar-chart-steps text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Últimos 5 partidos — Forma reciente</span></div>
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="fw-semibold small mb-2 text-truncate">– Wolves</div>
+            <table class="table table-sm mb-0" style="font-size:12px">
+              <thead class="table-light"><tr>
+                <th>Res</th><th>Fecha</th><th class="text-end">Δ Elo</th><th class="text-end">Elo</th>
+              </tr></thead>
+              <tbody><tr><td colspan="4" class="text-muted small">Sin datos</td></tr></tbody>
+            </table>
+          </div>
+          <div class="col-6">
+            <div class="fw-semibold small mb-2 text-truncate">Liverpool</div>
+            <table class="table table-sm mb-0" style="font-size:12px">
+              <thead class="table-light"><tr>
+                <th>Res</th><th>Fecha</th><th class="text-end">Δ Elo</th><th class="text-end">Elo</th>
+              </tr></thead>
+              <tbody><tr><td><span class="badge rounded-pill" style="background:#dc3545;min-width:28px">D</span></td><td class="text-muted small">2026-03-04</td><td class="text-end small fw-semibold" style="color:#dc3545">-13.6</td><td class="text-end small text-muted">1952</td></tr><tr><td><span class="badge rounded-pill" style="background:#6c757d;min-width:28px">E</span></td><td class="text-muted small">2026-03-01</td><td class="text-end small fw-semibold" style="color:#6c757d">+4.6</td><td class="text-end small text-muted">1965</td></tr><tr><td><span class="badge rounded-pill" style="background:#6c757d;min-width:28px">E</span></td><td class="text-muted small">2026-02-23</td><td class="text-end small fw-semibold" style="color:#6c757d">+5.0</td><td class="text-end small text-muted">1961</td></tr><tr><td><span class="badge rounded-pill" style="background:#6c757d;min-width:28px">E</span></td><td class="text-muted small">2026-02-12</td><td class="text-end small fw-semibold" style="color:#6c757d">+3.6</td><td class="text-end small text-muted">1952</td></tr><tr><td><span class="badge rounded-pill" style="background:#dc3545;min-width:28px">D</span></td><td class="text-muted small">2026-02-09</td><td class="text-end small fw-semibold" style="color:#dc3545">-9.1</td><td class="text-end small text-muted">1949</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+    
+    
+
+    <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
+      <div class="small text-muted" style="line-height:1.6">
+        <i class="bi bi-info-circle me-1"></i>
+        Score = prob. victoria (60%) + margen (40%) + claridad pick (20%) ± Elo ± BetPlay.<br>
+        Solo fines informativos. No constituye consejo de apuestas.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card mb-2 border-0 shadow-sm card-match" data-tier="ALTA"
+  data-comp="INGLATERRA – CHAMPIONSHIP"
+  style="border-left:4px solid #4A9BE8!important;cursor:pointer"
+  data-bs-toggle="offcanvas" data-bs-target="#m20">
+  <div class="card-body p-0">
+    <div class="row g-0 align-items-stretch">
+
+      <!-- LEFT: rank + ring + pick -->
+      <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
+        style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
+        <span class="fw-black" style="font-size:1.1rem;color:#A0AAB4">20</span>
+        <svg viewBox="0 0 44 44" width="48" height="48" class="flex-shrink-0"><circle cx="22" cy="22" r="20" fill="none" stroke="#E8EDF3" stroke-width="3"/><circle cx="22" cy="22" r="20" fill="none" stroke="#1A5C96" stroke-width="3" stroke-dasharray="70.4 125.7" stroke-linecap="round" transform="rotate(-90 22 22)"/><text x="22" y="27" text-anchor="middle" fill="#1A5C96" font-size="10" font-weight="700" font-family='Sora,sans-serif'>56</text></svg>
+        <span class="badge px-2 py-1 fw-bold" style="background:#1A5C9618;color:#1A5C96;border:1px solid #1A5C9640;font-size:11px">1X</span>
+      </div>
+
+      <!-- CENTER: info -->
+      <div class="col py-3 px-3" style="min-width:0">
+        <div class="d-flex align-items-center flex-wrap gap-1 mb-2">
+          <span class="badge bg-primary text-dark">
+            <i class="bi bi-graph-up-arrow me-1"></i>ALTA
+          </span>
+          
+          <span class="text-muted small text-truncate" style="max-width:250px">
+            <i class="bi bi-geo-alt me-1"></i>INGLATERRA – CHAMPIONSHIP
+          </span>
+          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>16:00 COL</span>
+        </div>
+        <div class="fw-black text-truncate mb-1" style="font-size:1rem;color:#1A5C96">– Preston</div>
+        <div class="text-muted small text-truncate mb-1">– Preston – Oxford United</div>
+        <div class="fst-italic text-secondary text-truncate mb-2" style="font-size:12px">1X – doble oportunidad</div>
+        <div class="d-flex flex-wrap gap-1">
+          <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle small"><i class="bi bi-lightning-charge me-1"></i>Elo: LOCAL</span>
+          <span class="badge bg-light text-secondary border small">+2.5: 40%</span>
+          <span class="badge bg-light text-secondary border small">BTTS: 48%</span>
+          <span class="badge bg-light text-muted border small">
+            <i class="bi bi-chevron-right"></i> ver detalles
+          </span>
+        </div>
+      </div>
+
+      <!-- RIGHT: prob bars -->
+      <div class="col-auto d-none d-md-flex flex-column justify-content-center px-3 py-3"
+        style="min-width:180px;background:#F8F9FB;border-left:1px solid #E8EDF3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="small fw-bold" style="width:14px;color:#8A9BAC">1</span>
+          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
+            <div class="progress-bar" style="width:47%;background:#1A5C96"></div>
+          </div>
+          <span class="small fw-bold" style="width:36px;text-align:right;color:#1A5C96">47%</span>
+        </div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="small fw-bold" style="width:14px;color:#8A9BAC">X</span>
+          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
+            <div class="progress-bar bg-secondary" style="width:33%;opacity:.4"></div>
+          </div>
+          <span class="small text-muted" style="width:36px;text-align:right">33%</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="small fw-bold" style="width:14px;color:#8A9BAC">2</span>
+          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
+            <div class="progress-bar" style="width:20%;background:#D0D8E4"></div>
+          </div>
+          <span class="small fw-normal" style="width:36px;text-align:right;color:#8A9BAC">20%</span>
+        </div>
+        <div class="text-end mt-2">
+          <span class="badge bg-light text-muted border" style="font-size:10px">+27pts ventaja</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="m20" style="width:min(600px,100vw)">
+  <div class="offcanvas-header border-bottom" style="border-left:4px solid #1A5C96">
+    <div class="flex-grow-1 min-width-0">
+      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+        <span class="badge bg-primary text-dark">
+          <i class="bi bi-graph-up-arrow me-1"></i>ALTA
+        </span>
+        
+        <span class="text-muted small"><i class="bi bi-trophy me-1"></i>INGLATERRA – CHAMPIONSHIP</span>
+        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>16:00 COL</span>
+      </div>
+      <h5 class="mb-1 fw-black" style="color:#1A5C96">– Preston</h5>
+      <div class="text-muted small">– Preston – Oxford United</div>
+      <div class="fst-italic text-secondary" style="font-size:12px">1X – doble oportunidad</div>
+    </div>
+    <button type="button" class="btn-close ms-3" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-1">
+      <div class="col-4">
+        <div class="card border-0 text-center py-3" style="background:#EBF4FF;border:1px solid #4A9BE8!important">
+          <div class="small fw-bold mb-1" style="color:#1A5C96;letter-spacing:1px">CONFIANZA</div>
+          <div style="font-size:2rem;font-weight:900;color:#1A5C96;line-height:1">56<span style="font-size:1rem">%</span></div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-0 bg-light text-center py-3">
+          <div class="small fw-bold text-muted mb-1" style="letter-spacing:1px">PICK</div>
+          <div style="font-size:2rem;font-weight:900;color:#1A5C96;line-height:1">1X</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-0 bg-light text-center py-3">
+          <div class="small fw-bold text-muted mb-1" style="letter-spacing:1px">VENTAJA</div>
+          <div style="font-size:2rem;font-weight:900;line-height:1">+27<span style="font-size:1rem">pts</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1X2 -->
+    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bar-chart-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Probabilidades de resultado</span></div>
+    <div class="row g-2 mb-1">
+      <div class="col-4"><div class="text-center p-2 rounded-3 border h-100" style="background:#1A5C9615;border-color:#1A5C9650!important"><div class="fw-bold small mb-1" style="color:#1A5C96">LOCAL (1)</div><div class="fw-black" style="font-size:1.4rem;color:#1A5C96">47%</div></div></div>
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">EMPATE (X)</div><div class="fw-bold text-secondary" style="font-size:1.4rem">33%</div></div></div>
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">VISITA (2)</div><div class="fw-bold text-secondary" style="font-size:1.4rem">20%</div></div></div>
+    </div>
+
+    <!-- HT -->
+    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-hourglass-split text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Medio tiempo</span></div>
+    <div class="row g-2 mb-1">
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Local</div><div class="fw-bold text-secondary" style="font-size:1.4rem">38%</div></div></div>
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Empate</div><div class="fw-bold text-secondary" style="font-size:1.4rem">43%</div></div></div>
+      <div class="col-4"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">HT Visita</div><div class="fw-bold text-secondary" style="font-size:1.4rem">19%</div></div></div>
+    </div>
+
+    <!-- Goles -->
+    <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-bullseye text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Mercado de goles</span></div>
+    <div class="row g-2 mb-1">
+      <div class="col"><div class="text-center p-2 rounded-3 border h-100" style="background:#22A86E15;border-color:#22A86E50!important"><div class="fw-bold small mb-1" style="color:#22A86E">+1.5</div><div class="fw-black" style="font-size:1.4rem;color:#22A86E">71%</div></div></div>
+      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">+2.5</div><div class="fw-bold text-secondary" style="font-size:1.4rem">40%</div></div></div>
+      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">+3.5</div><div class="fw-bold text-secondary" style="font-size:1.4rem">17%</div></div></div>
+      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">BTTS Sí</div><div class="fw-bold text-secondary" style="font-size:1.4rem">48%</div></div></div>
+      <div class="col"><div class="text-center p-2 rounded-3 border border-light-subtle bg-light h-100"><div class="text-muted small mb-1">BTTS No</div><div class="fw-bold text-secondary" style="font-size:1.4rem">52%</div></div></div>
+    </div>
+
+    
+        <div class="d-flex align-items-center gap-2 mt-4 mb-2 pb-2 border-bottom border-warning-subtle"><i class="bi bi-lightning-charge-fill text-warning"></i><span class="fw-bold text-uppercase small" style="letter-spacing:1.5px;color:#92720A">Club Elo — Fuerza histórica</span></div>
+        
+        <div class="mb-3">
+          <div class="d-flex align-items-center gap-1 mb-1">
+            <span class="small text-muted fw-semibold">Probabilidades según Elo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size:9px">CLUBELO</span>
+          </div>
+          <div class="row g-1 text-center">
+            <div class="col-4">
+              <div class="p-2 rounded bg-success-subtle border border-success-subtle">
+                <div class="text-muted" style="font-size:11px">LOCAL</div>
+                <div class="fw-bold text-success" style="font-size:1.1rem">45.7%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">EMPATE</div>
+                <div class="fw-bold" style="font-size:1.1rem">29.6%</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded bg-light">
+                <div class="text-muted" style="font-size:11px">VISITA</div>
+                <div class="fw-bold " style="font-size:1.1rem">24.7%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <div class="card border-0 bg-light text-center py-3">
+              <div class="text-muted small mb-1">– Preston</div>
+              <div class="fw-black" style="font-size:1.8rem">1510</div>
+              <div class="badge bg-secondary-subtle text-secondary-emphasis">ELO</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card border-0 bg-light text-center py-3">
+              <div class="text-muted small mb-1">Oxford United</div>
+              <div class="fw-black" style="font-size:1.8rem">1449</div>
+              <div class="badge bg-secondary-subtle text-secondary-emphasis">ELO</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-arrows-expand-vertical'></i> Diferencia</span><span class="fw-bold text-warning-emphasis small">+60 pts</span></div>
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light"><span class="text-muted small"><i class='bi bi-star-fill'></i> Favorito por Elo</span><span class="fw-semibold small">LOCAL</span></div>
+    
+    
+    
 
     <div class="mt-4 p-3 rounded-3 bg-light border border-light-subtle">
       <div class="small text-muted" style="line-height:1.6">
@@ -3573,13 +3746,11 @@
   </div>
 </div></div>
 
-  <!-- Empty state -->
   <div id="empty-state" class="text-center py-5 d-none">
     <i class="bi bi-search display-3 text-muted"></i>
     <div class="text-muted mt-3">No hay picks para este filtro</div>
   </div>
 
-  <!-- Leyenda -->
   <div class="card border-0 shadow-sm mt-4">
     <div class="card-body">
       <div class="small fw-bold text-uppercase text-muted mb-3" style="letter-spacing:2px">Leyenda</div>
@@ -3619,7 +3790,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 (function(){
-  // Modal creador
   const KEY = 'sport_v5';
   try {
     if (!localStorage.getItem(KEY)) {
