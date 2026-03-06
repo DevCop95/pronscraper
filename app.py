@@ -1,9 +1,7 @@
 """
 app.py — Servidor Flask para Render (gunicorn compatible).
-- Thread de background arranca al importar el módulo (funciona con gunicorn)
-- Pipeline cada 60 minutos
-- /refresh → refresco manual
-- /status  → healthcheck para Render
+Estrategia robusta: el pipeline se dispara desde /ping (UptimeRobot)
+y también desde el thread interno como respaldo.
 """
 
 import json, csv, sys, os, threading, time
@@ -28,16 +26,16 @@ CREATOR_IMAGE = "creador.png"
 FAVICON       = "favicon.ico"
 REFRESH_MINS  = 60
 
-# ── Estado compartido ─────────────────────────────────────────────────────────
-app   = Flask(__name__)
-_lock = threading.Lock()
+# ── Estado ────────────────────────────────────────────────────────────────────
+app    = Flask(__name__)
+_lock  = threading.Lock()
 _state = {
-    "last_update":  None,
-    "next_update":  None,
-    "running":      False,
-    "error":        None,
-    "stats":        {},
-    "run_count":    0,
+    "last_update":    None,
+    "running":        False,
+    "error":          None,
+    "stats":          {},
+    "run_count":      0,
+    "last_run_epoch": 0,   # timestamp unix del último pipeline exitoso
 }
 
 
@@ -50,13 +48,22 @@ def _col_time() -> str:
 def _col_ts() -> str:
     return _col_now().strftime("%H:%M COL · %d/%m/%Y")
 
+def _mins_since_last_run() -> float:
+    """Minutos desde el último pipeline exitoso."""
+    last = _state.get("last_run_epoch", 0)
+    if not last:
+        return 9999
+    return (time.time() - last) / 60
 
-# ── Pipeline principal ────────────────────────────────────────────────────────
 
-def run_pipeline() -> bool:
+# ── Pipeline ──────────────────────────────────────────────────────────────────
+
+def run_pipeline(force: bool = False) -> bool:
     with _lock:
         if _state["running"]:
-            print("⚠ Pipeline ya en ejecución, ignorando llamada")
+            return False
+        # No correr si ya corrió hace menos de 55 min (a menos que sea forzado)
+        if not force and _mins_since_last_run() < 55:
             return False
         _state["running"] = True
         _state["error"]   = None
@@ -67,26 +74,21 @@ def run_pipeline() -> bool:
         print(f"\n{'─'*55}")
         print(f"🔄 Pipeline #{run_n} — {_col_ts()}")
 
-        # 1. Scrape
-        print("⬇  Descargando predicciones...")
+        print("⬇  Scraping...")
         html_text = fetch_html(ALLOWED_URL)
 
-        # 2. Parse
-        print("🔍 Parseando HTML...")
+        print("🔍 Parseando...")
         items = parse_predictions(html_text, source=ALLOWED_URL)
         if not items:
-            raise RuntimeError("No se encontraron partidos en el HTML")
-        print(f"   ✓ {len(items)} partidos parseados")
+            raise RuntimeError("No se encontraron partidos")
+        print(f"   ✓ {len(items)} partidos")
 
-        # 3. Enriquecer BetPlay
-        print("🏦 Consultando BetPlay...")
+        print("🏦 BetPlay...")
         items = enrich_with_betplay(items)
 
-        # 4. Enriquecer ClubElo
-        print("📈 Cargando ClubElo...")
+        print("📈 ClubElo...")
         items = enrich_with_stats(items)
 
-        # 5. Guardar JSON y CSV crudos
         (OUT_DIR / "predicciones.json").write_text(
             json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8"
         )
@@ -95,19 +97,18 @@ def run_pipeline() -> bool:
             w = csv.DictWriter(f, fieldnames=cols)
             w.writeheader(); w.writerows(rows)
 
-        # 6. Analizar
-        print("📊 Analizando picks...")
+        print("📊 Analizando...")
         result     = analyze(items, top_n=TOP_N)
         top        = result["top"]
         stats_data = result["stats"]
-        print(f"   ✓ {stats_data['total_partidos']} partidos hoy | "
+        print(f"   ✓ {stats_data['total_partidos']} partidos | "
               f"{stats_data['elite']} ELITE | {stats_data['alta']} Alta | "
-              f"{stats_data['value_bets']} Value | {stats_data['avg_confidence']}% conf")
+              f"{stats_data['value_bets']} Value")
 
-        # 7. Guardar análisis JSON
         (OUT_DIR / "analisis.json").write_text(
             json.dumps({
                 "stats": stats_data,
+                "generated_at": _col_ts(),
                 "top": [
                     {k: v for k, v in r.items()
                      if not k.startswith("_") or k in
@@ -115,13 +116,10 @@ def run_pipeline() -> bool:
                       "_tier","_value","_pick","_margin")}
                     for r in top
                 ],
-                "generated_at": _col_ts(),
-            }, ensure_ascii=False, indent=2),
-            encoding="utf-8"
+            }, ensure_ascii=False, indent=2), encoding="utf-8"
         )
 
-        # 8. Generar HTML
-        print("🎨 Generando dashboard...")
+        print("🎨 Generando HTML...")
         build_html(
             top=top, stats=stats_data,
             output_path=str(INDEX_HTML),
@@ -131,12 +129,12 @@ def run_pipeline() -> bool:
         )
 
         with _lock:
-            _state["last_update"] = _col_ts()
-            _state["next_update"] = f"~{REFRESH_MINS} min"
-            _state["stats"]       = stats_data
-            _state["run_count"]   = run_n
+            _state["last_update"]    = _col_ts()
+            _state["stats"]          = stats_data
+            _state["run_count"]      = run_n
+            _state["last_run_epoch"] = time.time()
 
-        print(f"✅ Listo — próxima actualización en {REFRESH_MINS} min")
+        print(f"✅ Pipeline #{run_n} completo")
         print(f"{'─'*55}\n")
         return True
 
@@ -144,42 +142,46 @@ def run_pipeline() -> bool:
         import traceback
         with _lock:
             _state["error"] = str(ex)
-        print(f"✗ Error pipeline: {ex}", file=sys.stderr)
+        print(f"✗ Error: {ex}", file=sys.stderr)
         traceback.print_exc()
         return False
-
     finally:
         with _lock:
             _state["running"] = False
 
 
-# ── Background loop ───────────────────────────────────────────────────────────
-# CRÍTICO: se define AQUÍ (nivel de módulo) para que gunicorn lo arranque
-# al importar app.py. Si estuviera dentro de if __name__=="__main__"
-# gunicorn nunca lo ejecutaría y no habría auto-refresh.
+# ── Background thread (respaldo) ──────────────────────────────────────────────
 
 def _background_loop():
-    time.sleep(3)   # esperar que Flask esté listo
+    time.sleep(5)
+    print("🧵 Background thread iniciado")
     while True:
-        run_pipeline()
-        print(f"💤 Durmiendo {REFRESH_MINS} min hasta próxima actualización...")
+        try:
+            run_pipeline()
+        except Exception as ex:
+            print(f"✗ Background loop error: {ex}")
         time.sleep(REFRESH_MINS * 60)
 
 
-_bg_thread = threading.Thread(target=_background_loop, daemon=True, name="pipeline-loop")
-_bg_thread.start()
+_bg = threading.Thread(target=_background_loop, daemon=True, name="bg-pipeline")
+_bg.start()
 
 
-# ── Rutas Flask ───────────────────────────────────────────────────────────────
+# ── Rutas ─────────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
-    if INDEX_HTML.exists():
+    # Si nunca ha corrido o pasaron 55+ min → disparar pipeline en background
+    if _mins_since_last_run() >= 55 and not _state["running"]:
+        t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
+        t.start()
+
+    if INDEX_HTML.exists() and _state["run_count"] > 0:
         return send_file(str(INDEX_HTML))
-    return Response("""
-    <!DOCTYPE html>
-    <html lang="es">
-    <head><meta charset="UTF-8"><title>Cargando análisis...</title>
+
+    # Página de espera mientras corre el primer pipeline
+    return Response("""<!DOCTYPE html><html lang="es">
+    <head><meta charset="UTF-8"><title>Cargando...</title>
     <meta http-equiv="refresh" content="15">
     <style>
       body{margin:0;display:flex;align-items:center;justify-content:center;
@@ -189,23 +191,46 @@ def index():
                border-top-color:#B8960C;border-radius:50%;
                animation:spin 1s linear infinite;margin:0 auto 20px}
       @keyframes spin{to{transform:rotate(360deg)}}
-      h2{color:#B8960C;margin-bottom:8px}
-      p{color:#aaa;font-size:14px}
+      h2{color:#B8960C}p{color:#aaa;font-size:14px}
     </style></head>
     <body><div class="box">
       <div class="spinner"></div>
-      <h2>Preparando el análisis...</h2>
-      <p>Primera ejecución en curso. La página se recargará automáticamente.</p>
+      <h2>Preparando análisis...</h2>
+      <p>Generando picks del día. Se recargará automáticamente en ~15s.</p>
       <p style="font-size:12px;color:#555">DevOpsHB · SportAnalysis</p>
-    </div></body></html>
-    """, mimetype="text/html")
+    </div></body></html>""", mimetype="text/html")
+
+
+@app.route("/ping")
+def ping():
+    """
+    UptimeRobot llama este endpoint cada 5 min.
+    Si pasaron 55+ minutos desde el último pipeline → dispara uno nuevo.
+    Esto garantiza ejecución incluso si el thread interno murió.
+    """
+    mins = _mins_since_last_run()
+    if mins >= 55 and not _state["running"]:
+        t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
+        t.start()
+        return jsonify({
+            "status": "pipeline_started",
+            "mins_since_last": round(mins, 1),
+            "hora": _col_time()
+        })
+    return jsonify({
+        "status": "ok",
+        "mins_since_last": round(mins, 1),
+        "next_run_in_mins": round(max(0, 55 - mins), 1),
+        "hora": _col_time()
+    })
 
 
 @app.route("/refresh")
 def refresh():
+    """Forzar pipeline manualmente."""
     if _state["running"]:
-        return jsonify({"status": "running", "message": "Pipeline ya en curso, espera..."})
-    t = threading.Thread(target=run_pipeline, daemon=True)
+        return jsonify({"status": "running", "message": "Pipeline ya en curso..."})
+    t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
     t.start()
     return jsonify({"status": "started", "message": "Pipeline iniciado. Refresca en ~45s"})
 
@@ -214,10 +239,12 @@ def refresh():
 def status():
     with _lock:
         s = dict(_state)
-    s["html_existe"]   = INDEX_HTML.exists()
-    s["refresh_mins"]  = REFRESH_MINS
-    s["hora_colombia"] = _col_time()
-    s["thread_vivo"]   = _bg_thread.is_alive()
+    s.pop("last_run_epoch", None)
+    s["html_existe"]      = INDEX_HTML.exists()
+    s["refresh_mins"]     = REFRESH_MINS
+    s["hora_colombia"]    = _col_time()
+    s["thread_vivo"]      = _bg.is_alive()
+    s["mins_desde_update"]= round(_mins_since_last_run(), 1)
     return jsonify(s)
 
 
@@ -238,12 +265,10 @@ def favicon_route():
 @app.route("/<path:filename>")
 def static_files(filename):
     p = Path(filename)
-    if p.exists() and p.suffix in (".png", ".jpg", ".ico", ".css", ".js", ".webp"):
+    if p.exists() and p.suffix in (".png",".jpg",".ico",".css",".js",".webp"):
         return send_file(str(p))
     return Response("Not found", 404)
 
-
-# ── Entry point local ─────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
