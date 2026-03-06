@@ -152,15 +152,20 @@ def run_pipeline(force: bool = False) -> bool:
 
 # ── Background thread (respaldo) ──────────────────────────────────────────────
 
+# ── Arranque: correr pipeline ANTES de aceptar peticiones ────────────────────
+# Esto garantiza que index.html existe desde el primer request.
+# gunicorn --timeout 120 da tiempo suficiente.
+print("🚀 Arrancando servidor — ejecutando pipeline inicial...")
+run_pipeline(force=True)
+
+# Background thread como respaldo cada hora
 def _background_loop():
-    time.sleep(5)
-    print("🧵 Background thread iniciado")
     while True:
+        time.sleep(REFRESH_MINS * 60)
         try:
             run_pipeline()
         except Exception as ex:
             print(f"✗ Background loop error: {ex}")
-        time.sleep(REFRESH_MINS * 60)
 
 
 _bg = threading.Thread(target=_background_loop, daemon=True, name="bg-pipeline")
@@ -171,18 +176,17 @@ _bg.start()
 
 @app.route("/")
 def index():
-    # Si nunca ha corrido o pasaron 55+ min → disparar pipeline en background
+    # Si pasaron 55+ min desde última actualización → refrescar en background
     if _mins_since_last_run() >= 55 and not _state["running"]:
         t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
         t.start()
 
-    if INDEX_HTML.exists() and _state["run_count"] > 0:
+    if INDEX_HTML.exists():
         return send_file(str(INDEX_HTML))
 
-    # Página de espera mientras corre el primer pipeline
     return Response("""<!DOCTYPE html><html lang="es">
     <head><meta charset="UTF-8"><title>Cargando...</title>
-    <meta http-equiv="refresh" content="15">
+    <meta http-equiv="refresh" content="10">
     <style>
       body{margin:0;display:flex;align-items:center;justify-content:center;
            min-height:100vh;background:#0f0f1a;font-family:sans-serif;color:#fff}
@@ -196,7 +200,7 @@ def index():
     <body><div class="box">
       <div class="spinner"></div>
       <h2>Preparando análisis...</h2>
-      <p>Generando picks del día. Se recargará automáticamente en ~15s.</p>
+      <p>Generando picks del día. Se recargará en ~10s.</p>
       <p style="font-size:12px;color:#555">DevOpsHB · SportAnalysis</p>
     </div></body></html>""", mimetype="text/html")
 
