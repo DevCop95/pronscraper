@@ -105,7 +105,7 @@ def run_pipeline(force: bool = False) -> bool:
         top        = result["top"]
         stats_data = result["stats"]
 
-        # Forma: SOLO para el top (máx 40 requests en vez de 238)
+        # Forma: SOLO para el top (máx 40 requests)
         elo_names = [k for k in [r.get("equipo_local","") for r in top] +
                                  [r.get("equipo_visitante","") for r in top] if k]
         print(f"📅 Forma reciente ({len(top)} partidos del top)...")
@@ -160,19 +160,23 @@ def run_pipeline(force: bool = False) -> bool:
             _state["running"] = False
 
 
-# Arranque sincrónico
-print("🚀 Arrancando servidor — ejecutando pipeline inicial...")
-run_pipeline(force=True)
-
-
-# Background thread cada hora
+# ── Background loop: pipeline inicial + refresco cada hora ───────────────────
 def _background_loop():
+    # Pipeline inicial en background (NO bloquea gunicorn)
+    print("🚀 Pipeline inicial arrancando en background...")
+    try:
+        run_pipeline(force=True)
+    except Exception as ex:
+        print(f"✗ Pipeline inicial error: {ex}")
+
+    # Luego repetir cada hora
     while True:
         time.sleep(REFRESH_MINS * 60)
         try:
             run_pipeline()
         except Exception as ex:
             print(f"✗ Background loop error: {ex}")
+
 
 _bg = threading.Thread(target=_background_loop, daemon=True, name="bg-pipeline")
 _bg.start()
