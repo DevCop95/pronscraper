@@ -1,5 +1,11 @@
 """
 app.py — Servidor Flask para Render (gunicorn compatible).
+
+CÓMO SE EJECUTA EL PIPELINE:
+  1. Al arrancar Render → background thread lo corre inmediatamente
+  2. UptimeRobot pinga /ping cada 5 min → si pasaron 55+ min, dispara pipeline en thread
+  3. /refresh → fuerza pipeline manual
+  4. / → si pasaron 55+ min, dispara pipeline en background
 """
 
 import json, csv, sys, os, threading, time
@@ -15,14 +21,16 @@ from src.html_builder    import build as build_html
 from src.betplay_fetcher import enrich_with_betplay
 from src.stats_enricher  import enrich_with_stats, enrich_with_form
 
+# ── Config ────────────────────────────────────────────────────────────────────
 OUT_DIR       = Path("outputs")
 INDEX_HTML    = Path("index.html")
 TOP_N         = 20
 CREATOR_NAME  = "DevOpsHB"
 CREATOR_IMAGE = "creador.png"
 FAVICON       = "favicon.ico"
-REFRESH_MINS  = 60
+REFRESH_MINS  = 55  # cada 55 minutos se regenera
 
+# ── Estado ────────────────────────────────────────────────────────────────────
 app    = Flask(__name__)
 _lock  = threading.Lock()
 _state = {
@@ -35,27 +43,29 @@ _state = {
 }
 
 
-def _col_now() -> datetime:
+def _col_now():
     return datetime.now(timezone(timedelta(hours=-5)))
 
-def _col_time() -> str:
+def _col_time():
     return _col_now().strftime("%H:%M")
 
-def _col_ts() -> str:
+def _col_ts():
     return _col_now().strftime("%H:%M COL · %d/%m/%Y")
 
-def _mins_since_last_run() -> float:
+def _mins_since_last_run():
     last = _state.get("last_run_epoch", 0)
     if not last:
         return 9999
     return (time.time() - last) / 60
 
 
-def run_pipeline(force: bool = False) -> bool:
+# ── Pipeline ──────────────────────────────────────────────────────────────────
+
+def run_pipeline(force=False):
     with _lock:
         if _state["running"]:
             return False
-        if not force and _mins_since_last_run() < 55:
+        if not force and _mins_since_last_run() < REFRESH_MINS:
             return False
         _state["running"] = True
         _state["error"]   = None
@@ -105,7 +115,6 @@ def run_pipeline(force: bool = False) -> bool:
         top        = result["top"]
         stats_data = result["stats"]
 
-        # Forma: SOLO para el top (máx 40 requests)
         elo_names = [k for k in [r.get("equipo_local","") for r in top] +
                                  [r.get("equipo_visitante","") for r in top] if k]
         print(f"📅 Forma reciente ({len(top)} partidos del top)...")
@@ -144,7 +153,7 @@ def run_pipeline(force: bool = False) -> bool:
             _state["run_count"]      = run_n
             _state["last_run_epoch"] = time.time()
 
-        print(f"✅ Pipeline #{run_n} completo")
+        print(f"✅ Pipeline #{run_n} completo — {_col_ts()}")
         print(f"{'─'*55}\n")
         return True
 
@@ -152,7 +161,7 @@ def run_pipeline(force: bool = False) -> bool:
         import traceback
         with _lock:
             _state["error"] = str(ex)
-        print(f"✗ Error: {ex}", file=sys.stderr)
+        print(f"✗ Pipeline error: {ex}", file=sys.stderr)
         traceback.print_exc()
         return False
     finally:
@@ -160,16 +169,13 @@ def run_pipeline(force: bool = False) -> bool:
             _state["running"] = False
 
 
-# ── Background loop: pipeline inicial + refresco cada hora ───────────────────
+# ── Background thread ─────────────────────────────────────────────────────────
 def _background_loop():
-    # Pipeline inicial en background (NO bloquea gunicorn)
     print("🚀 Pipeline inicial arrancando en background...")
     try:
         run_pipeline(force=True)
     except Exception as ex:
         print(f"✗ Pipeline inicial error: {ex}")
-
-    # Luego repetir cada hora
     while True:
         time.sleep(REFRESH_MINS * 60)
         try:
@@ -177,14 +183,15 @@ def _background_loop():
         except Exception as ex:
             print(f"✗ Background loop error: {ex}")
 
-
 _bg = threading.Thread(target=_background_loop, daemon=True, name="bg-pipeline")
 _bg.start()
 
 
+# ── Rutas ─────────────────────────────────────────────────────────────────────
+
 @app.route("/")
 def index():
-    if _mins_since_last_run() >= 55 and not _state["running"]:
+    if _mins_since_last_run() >= REFRESH_MINS and not _state["running"]:
         t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
         t.start()
     if INDEX_HTML.exists():
@@ -210,6 +217,41 @@ def index():
     </div></body></html>""", mimetype="text/html")
 
 
+@app.route("/ping")
+def ping():
+    """
+    UptimeRobot llama este endpoint cada 5 min.
+    Si pasaron 55+ min → dispara pipeline en thread y responde inmediato.
+    """
+    mins = _mins_since_last_run()
+    if mins >= REFRESH_MINS and not _state["running"]:
+        t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
+        t.start()
+        return jsonify({
+            "status":          "pipeline_started",
+            "mins_since_last": round(mins, 1),
+            "run_count":       _state["run_count"],
+            "hora":            _col_time(),
+        })
+    return jsonify({
+        "status":           "ok",
+        "mins_since_last":  round(mins, 1),
+        "next_run_in_mins": round(max(0, REFRESH_MINS - mins), 1),
+        "run_count":        _state["run_count"],
+        "running":          _state["running"],
+        "hora":             _col_time(),
+    })
+
+
+@app.route("/refresh")
+def refresh():
+    if _state["running"]:
+        return jsonify({"status": "running", "message": "Pipeline ya en curso..."})
+    t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
+    t.start()
+    return jsonify({"status": "started", "message": "Pipeline iniciado. Refresca en ~2 min"})
+
+
 @app.route("/upload", methods=["POST"])
 def upload_html():
     html = request.get_data(as_text=True)
@@ -223,25 +265,6 @@ def upload_html():
     t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
     t.start()
     return jsonify({"status": "ok", "chars": len(html), "message": "Pipeline iniciado"})
-
-
-@app.route("/ping")
-def ping():
-    mins = _mins_since_last_run()
-    if mins >= 55 and not _state["running"]:
-        t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
-        t.start()
-        return jsonify({"status": "pipeline_started", "mins_since_last": round(mins, 1), "hora": _col_time()})
-    return jsonify({"status": "ok", "mins_since_last": round(mins, 1), "next_run_in_mins": round(max(0, 55 - mins), 1), "hora": _col_time()})
-
-
-@app.route("/refresh")
-def refresh():
-    if _state["running"]:
-        return jsonify({"status": "running", "message": "Pipeline ya en curso..."})
-    t = threading.Thread(target=run_pipeline, args=(True,), daemon=True)
-    t.start()
-    return jsonify({"status": "started", "message": "Pipeline iniciado. Refresca en ~45s"})
 
 
 @app.route("/status")

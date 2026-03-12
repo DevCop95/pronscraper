@@ -11,6 +11,25 @@ import re
 from datetime import datetime
 from typing import Any
 
+# ── Ligas excluidas (irrelevantes o de baja calidad) ─────────────────────────
+BLOCKED_LEAGUES = {
+    "kuwait",
+    "estonia",
+    "chipre",
+    "meistriliiga",
+    "relegation group",
+    "singapur",
+    "singapore",
+    "moldavia",
+    "moldova",
+    "nigeria",
+    "nígeria",
+}
+
+def _is_blocked_league(competicion: str) -> bool:
+    c = (competicion or "").lower()
+    return any(kw in c for kw in BLOCKED_LEAGUES)
+
 
 def pick_type(pronostico: str) -> str:
     p = (pronostico or "").lower().replace(" ", "").replace("—", "").replace("-", "")
@@ -105,6 +124,10 @@ def _is_value_bet(prob_win: int, prob_rival: int) -> bool:
 
 def analyze(items: list[dict[str, Any]], top_n: int = 20) -> dict[str, Any]:
     today_items = filter_today(items)
+
+    # Filtrar ligas bloqueadas
+    today_items = [it for it in today_items if not _is_blocked_league(it.get("competicion", ""))]
+
     enriched: list[dict] = []
 
     for it in today_items:
@@ -156,25 +179,49 @@ def analyze(items: list[dict[str, Any]], top_n: int = 20) -> dict[str, Any]:
         enriched.append(e)
 
     enriched.sort(key=lambda x: (x["_confidence"], x["_prob_win"]), reverse=True)
-    top = enriched[:top_n]
 
-    total        = len(today_items)
-    elite_count  = sum(1 for e in enriched if e["_tier"] == "ELITE")
-    alta_count   = sum(1 for e in enriched if e["_tier"] == "ALTA")
-    value_count  = sum(1 for e in enriched if e["_value"])
-    avg_conf     = round(sum(e["_confidence"] for e in enriched) / len(enriched), 1) if enriched else 0
-    competiciones= len({e["competicion"] for e in today_items if e.get("competicion")})
+    # ── Top balanceado: garantizar picks de cada tier ─────────────────────────
+    # Distribución: 50% Elite, 35% Alta, 15% Media (del top_n pedido)
+    quota_elite = max(1, round(top_n * 0.50))          # ~10 de 20
+    quota_alta  = max(1, round(top_n * 0.35))          # ~7 de 20
+    quota_media = max(1, top_n - quota_elite - quota_alta)  # ~3 de 20
+
+    elite_picks = [e for e in enriched if e["_tier"] == "ELITE"][:quota_elite]
+    alta_picks  = [e for e in enriched if e["_tier"] == "ALTA"][:quota_alta]
+    media_picks = [e for e in enriched if e["_tier"] == "MEDIA"][:quota_media]
+
+    # Si algún bucket está vacío, el espacio lo llena el siguiente en ranking
+    top_balanced = elite_picks + alta_picks + media_picks
+    used_ids = {id(e) for e in top_balanced}
+
+    # Rellenar hasta top_n con los mejores restantes (sin duplicar)
+    for e in enriched:
+        if len(top_balanced) >= top_n:
+            break
+        if id(e) not in used_ids:
+            top_balanced.append(e)
+            used_ids.add(id(e))
+
+    # Reordenar el top final por confianza descendente para la vista
+    top = sorted(top_balanced, key=lambda x: (x["_confidence"], x["_prob_win"]), reverse=True)
+
+    total         = len(today_items)
+    elite_count   = sum(1 for e in enriched if e["_tier"] == "ELITE")
+    alta_count    = sum(1 for e in enriched if e["_tier"] == "ALTA")
+    value_count   = sum(1 for e in enriched if e["_value"])
+    avg_conf      = round(sum(e["_confidence"] for e in enriched) / len(enriched), 1) if enriched else 0
+    competiciones = len({e["competicion"] for e in today_items if e.get("competicion")})
 
     stats = {
-        "total_partidos":   total,
-        "analizados":       len(enriched),
-        "elite":            elite_count,
-        "alta":             alta_count,
-        "value_bets":       value_count,
-        "avg_confidence":   avg_conf,
-        "competiciones":    competiciones,
-        "fecha":            datetime.now().strftime("%d %b %Y"),
-        "hora_generacion":  datetime.now().strftime("%H:%M:%S"),
+        "total_partidos":  total,
+        "analizados":      len(enriched),
+        "elite":           elite_count,
+        "alta":            alta_count,
+        "value_bets":      value_count,
+        "avg_confidence":  avg_conf,
+        "competiciones":   competiciones,
+        "fecha":           datetime.now().strftime("%d %b %Y"),
+        "hora_generacion": datetime.now().strftime("%H:%M:%S"),
     }
 
     return {"top": top, "stats": stats, "all": enriched}
