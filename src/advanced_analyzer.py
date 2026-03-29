@@ -4,8 +4,19 @@ Implementa razonamiento estadístico avanzado, modelos probabilísticos y justif
 """
 
 import math
-from scipy.stats import poisson
 from typing import Any, Dict, List
+
+def poisson_pmf(k: int, mu: float) -> float:
+    """
+    Calcula la Función de Masa de Probabilidad (PMF) de Poisson sin scipy.
+    P(X=k) = (e^-mu * mu^k) / k!
+    """
+    if mu <= 0:
+        return 1.0 if k == 0 else 0.0
+    try:
+        return (math.exp(-mu) * (mu ** k)) / math.factorial(k)
+    except (OverflowError, ValueError):
+        return 0.0
 
 class FootballAgent:
     def __init__(self):
@@ -24,7 +35,7 @@ class FootballAgent:
         for h in range(max_goals + 1):
             for a in range(max_goals + 1):
                 # Probabilidad de que el local anote h y el visitante anote a
-                p = poisson.pmf(h, avg_goals_home) * poisson.pmf(a, avg_goals_away)
+                p = poisson_pmf(h, avg_goals_home) * poisson_pmf(a, avg_goals_away)
                 
                 if h > a:
                     prob_home += p
@@ -35,6 +46,8 @@ class FootballAgent:
         
         # Normalizar para que sumen 1 (por si acaso el max_goals es bajo)
         total = prob_home + prob_draw + prob_away
+        if total <= 0: return {"1": 33.3, "X": 33.3, "2": 33.3}
+        
         return {
             "1": float(round((prob_home / total) * 100, 2)),
             "X": float(round((prob_draw / total) * 100, 2)),
