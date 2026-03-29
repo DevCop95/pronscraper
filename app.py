@@ -20,6 +20,8 @@ from src.analyzer        import analyze
 from src.html_builder    import build as build_html
 from src.betplay_fetcher import enrich_with_betplay
 from src.stats_enricher  import enrich_with_stats, enrich_with_form
+from src.advanced_analyzer import run_advanced_analysis
+from src.backtester import log_predictions
 
 # ── Config ────────────────────────────────────────────────────────────────────
 OUT_DIR       = Path("outputs")
@@ -50,7 +52,7 @@ def _col_time():
     return _col_now().strftime("%H:%M")
 
 def _col_ts():
-    return _col_now().strftime("%H:%M COL · %d/%m/%Y")
+    return _col_now().strftime("%H:%M COL \u00b7 %d/%m/%Y")
 
 def _mins_since_last_run():
     last = _state.get("last_run_epoch", 0)
@@ -77,13 +79,12 @@ def run_pipeline(force=False):
         print(f"🔄 Pipeline #{run_n} — {_col_ts()}")
 
         print("⬇  Scraping...")
-        HTML_CACHE = OUT_DIR / "cache.html"
         try:
             html_text = fetch_html(ALLOWED_URL)
-            HTML_CACHE.write_text(html_text, encoding="utf-8")
-            print("   ✓ HTML guardado en caché")
+            print("   ✓ HTML obtenido")
         except Exception as scrape_err:
             print(f"   ⚠ Scrape falló: {scrape_err}")
+            HTML_CACHE = OUT_DIR / "cache.html"
             if HTML_CACHE.exists():
                 print("   🔄 Usando HTML en caché del último scrape exitoso...")
                 html_text = HTML_CACHE.read_text(encoding="utf-8")
@@ -102,18 +103,13 @@ def run_pipeline(force=False):
         print("📈 ClubElo...")
         items = enrich_with_stats(items)
 
-        (OUT_DIR / "predicciones.json").write_text(
-            json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-        rows, cols = to_rows(items)
-        with (OUT_DIR / "predicciones.csv").open("w", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=cols)
-            w.writeheader(); w.writerows(rows)
-
         print("📊 Analizando...")
         result     = analyze(items, top_n=TOP_N)
         top        = result["top"]
         stats_data = result["stats"]
+
+        print("🤖 Ejecutando Agente Especializado...")
+        top = run_advanced_analysis(top)
 
         elo_names = [k for k in [r.get("equipo_local","") for r in top] +
                                  [r.get("equipo_visitante","") for r in top] if k]
@@ -132,11 +128,14 @@ def run_pipeline(force=False):
                     {k: v for k, v in r.items()
                      if not k.startswith("_") or k in
                      ("_favorito","_prob_win","_prob_rival","_confidence",
-                      "_tier","_value","_pick","_margin")}
+                      "_tier","_value","_pick","_margin",
+                      "adv_pick","adv_confidence","adv_is_value",
+                      "adv_justification","adv_expected_goals","adv_probs")}
                     for r in top
                 ],
             }, ensure_ascii=False, indent=2), encoding="utf-8"
         )
+        log_predictions(top)
 
         print("🎨 Generando HTML...")
         build_html(
@@ -213,7 +212,7 @@ def index():
       <div class="spinner"></div>
       <h2>Preparando análisis...</h2>
       <p>Generando picks del día. Se recargará en ~10s.</p>
-      <p style="font-size:12px;color:#555">DevOpsHB · SportAnalysis</p>
+      <p style="font-size:12px;color:#555">DevOpsHB \u00b7 SportAnalysis</p>
     </div></body></html>""", mimetype="text/html")
 
 

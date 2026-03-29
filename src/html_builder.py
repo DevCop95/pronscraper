@@ -115,6 +115,51 @@ def _modal(r: dict, idx: int) -> str:
     bp_p2   = r.get("betplay_impl_prob_2",0)
     bp_ok   = r.get("betplay_matched",False)
 
+    # ── Advanced Agent Section ──────────────────────────────────────────────
+    adv_just     = _e(r.get("adv_justification", "Análisis en curso..."))
+    adv_conf     = r.get("adv_confidence", 0)
+    adv_pick     = _e(r.get("adv_pick", "—"))
+    adv_exp_goals = r.get("adv_expected_goals")
+    adv_probs    = r.get("adv_probs", {})
+    
+    exp_goals_html = ""
+    if adv_exp_goals and adv_exp_goals[0] is not None:
+        exp_goals_html = (f'<div class="badge bg-dark-subtle text-dark border border-dark-subtle mb-2">'
+                          f'<i class="bi bi-bullseye me-1"></i>xG Esperado: {adv_exp_goals[0]} - {adv_exp_goals[1]}</div>')
+
+    agent_html = f"""
+    {_section_hd("Agente IA — Razonamiento Estadístico","bi-robot")}
+    <div class="p-3 rounded-3 mb-3" style="background:rgba(184,150,12,0.08); border:1px solid rgba(184,150,12,0.2)">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="badge bg-warning text-dark"><i class="bi bi-cpu-fill me-1"></i>MODELO POISSON + ELO</span>
+            <span class="ms-auto fw-bold" style="color:#92720A">Confianza Agente: {adv_conf}%</span>
+        </div>
+        <div class="fw-semibold text-dark mb-2" style="font-size:13px; line-height:1.5">
+            <i class="bi bi-chat-right-quote-fill text-warning me-2"></i>"{adv_just}"
+        </div>
+        {exp_goals_html}
+        <div class="row g-1 text-center mt-2">
+            <div class="col-4">
+                <div class="p-1 rounded bg-white border" style="font-size:10px">
+                    <div class="text-muted">IA LOCAL</div>
+                    <div class="fw-bold">{adv_probs.get('1', 0)}%</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="p-1 rounded bg-white border" style="font-size:10px">
+                    <div class="text-muted">IA EMPATE</div>
+                    <div class="fw-bold">{adv_probs.get('X', 0)}%</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="p-1 rounded bg-white border" style="font-size:10px">
+                    <div class="text-muted">IA VISITA</div>
+                    <div class="fw-bold">{adv_probs.get('2', 0)}%</div>
+                </div>
+            </div>
+        </div>
+    </div>"""
+
     local_n  = _e(r.get("equipo_local","Local"))
     visita_n = _e(r.get("equipo_visitante","Visitante"))
     vtag     = ('<span class="badge bg-warning text-dark ms-1"><i class="bi bi-gem me-1"></i>VALUE BET</span>'
@@ -311,6 +356,9 @@ def _modal(r: dict, idx: int) -> str:
   </div>
   <div class="offcanvas-body">
 
+    <!-- Agente IA -->
+    {agent_html}
+
     <!-- KPIs -->
     <div class="row g-3 mb-1">
       <div class="col-4">
@@ -412,6 +460,14 @@ def _card(idx: int, r: dict) -> str:
         bp_badge = ('<span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle small">'
                     '<i class="bi bi-currency-dollar me-1"></i>BetPlay</span>')
 
+    ai_badge = ""
+    if r.get("adv_confidence", 0) >= 70:
+        ai_badge = ('<span class="badge bg-warning text-dark border border-warning small">'
+                    '<i class="bi bi-robot me-1"></i>IA: Alta Confianza</span>')
+    elif r.get("adv_is_value"):
+        ai_badge = ('<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle small">'
+                    '<i class="bi bi-robot me-1"></i>IA: Value Detectado</span>')
+
     vtag = ('<span class="badge bg-warning text-dark small"><i class="bi bi-gem me-1"></i>VALUE</span>'
             if value else "")
 
@@ -430,74 +486,51 @@ def _card(idx: int, r: dict) -> str:
             f' font-size="10" font-weight="700" font-family=\'Sora,sans-serif\'>{conf}</text></svg>')
 
     return f"""
-<div class="card mb-2 border-0 shadow-sm card-match" data-tier="{tier}"
+<div class="card mb-2 border-0 card-match" data-tier="{tier}"
   data-comp="{_e(r.get('competicion',''))}"
-  style="border-left:4px solid {tc['border']}!important;cursor:pointer"
+  style="cursor:pointer"
   data-bs-toggle="offcanvas" data-bs-target="#{mid}">
-  <div class="card-body p-0">
-    <div class="row g-0 align-items-stretch">
-
-      <!-- LEFT: rank + ring + pick -->
-      <div class="col-auto d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-3"
-        style="background:#F8F9FB;border-right:1px solid #E8EDF3;min-width:80px">
-        <span class="fw-black" style="font-size:1.1rem;color:{rank_c}">{idx}</span>
+  <div class="card-body p-3">
+    <div class="d-flex align-items-center gap-3">
+      
+      <!-- Rank & Ring Minimal -->
+      <div class="d-flex flex-column align-items-center" style="min-width:40px">
+        <div class="text-muted fw-bold mb-1" style="font-size:10px; opacity:0.5">#{idx}</div>
         {ring}
-        <span class="badge px-2 py-1 fw-bold" style="background:{acc}18;color:{acc};border:1px solid {acc}40;font-size:11px">{pick}</span>
       </div>
 
-      <!-- CENTER: info -->
-      <div class="col py-3 px-3" style="min-width:0">
-        <div class="d-flex align-items-center flex-wrap gap-1 mb-2">
-          <span class="badge bg-{tc['badge']} text-dark">
-            <i class="bi {tc['icon']} me-1"></i>{tc['label']}
-          </span>
-          {vtag}
-          <span class="text-muted small text-truncate" style="max-width:250px">
-            <i class="bi bi-geo-alt me-1"></i>{comp}
-          </span>
-          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-auto"><i class="bi bi-clock-fill me-1"></i>{hora}</span>
+      <!-- Main Info -->
+      <div class="flex-grow-1 min-width-0">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-warning">{tc['label']}</span>
+          <span class="text-muted" style="font-size:11px; opacity:0.7">{comp}</span>
+          <span class="ms-auto text-muted fw-semibold" style="font-size:11px">{hora}</span>
         </div>
-        <div class="fw-black text-truncate mb-1" style="font-size:1rem;color:{acc}">{fav}</div>
-        <div class="text-muted small text-truncate mb-1">{eq}</div>
-        <div class="fst-italic text-secondary text-truncate mb-2" style="font-size:12px">{prono}</div>
-        <div class="d-flex flex-wrap gap-1">
-          {elo_badge}{bp_badge}
-          <span class="badge bg-light text-secondary border small">+2.5: {o25}%</span>
-          <span class="badge bg-light text-secondary border small">BTTS: {bty}%</span>
-          <span class="badge bg-light text-muted border small">
-            <i class="bi bi-chevron-right"></i> ver detalles
-          </span>
+        <div class="fw-black text-truncate" style="font-size:1.1rem; color:var(--premium-black)">{fav}</div>
+        <div class="text-muted small text-truncate" style="font-size:12px">{eq}</div>
+        
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          {ai_badge}{elo_badge}{bp_badge}
+          <span class="badge bg-light text-muted border-0" style="background:rgba(0,0,0,0.03)!important">{pick}</span>
         </div>
       </div>
 
-      <!-- RIGHT: prob bars -->
-      <div class="col-auto d-none d-md-flex flex-column justify-content-center px-3 py-3"
-        style="min-width:180px;background:#F8F9FB;border-left:1px solid #E8EDF3">
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">1</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar" style="width:{p1w}%;background:{''+acc if is_local else '#D0D8E4'}"></div>
+      <!-- Prob Bars - Ultra Minimal -->
+      <div class="d-none d-md-block" style="min-width:120px">
+        <div class="d-flex flex-column gap-1">
+          <div class="progress" style="height:2px!important">
+            <div class="progress-bar" style="width:{p1w}%"></div>
           </div>
-          <span class="small fw-{'bold' if is_local else 'normal'}" style="width:36px;text-align:right;color:{acc if is_local else '#8A9BAC'}">{p1}%</span>
-        </div>
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">X</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar bg-secondary" style="width:{pxw}%;opacity:.4"></div>
+          <div class="progress" style="height:2px!important; opacity:0.3">
+            <div class="progress-bar bg-secondary" style="width:{pxw}%"></div>
           </div>
-          <span class="small text-muted" style="width:36px;text-align:right">{px}%</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <span class="small fw-bold" style="width:14px;color:#8A9BAC">2</span>
-          <div class="progress flex-grow-1" style="height:5px;background:#E0E6EF">
-            <div class="progress-bar" style="width:{p2w}%;background:{''+acc if not is_local else '#D0D8E4'}"></div>
+          <div class="progress" style="height:2px!important">
+            <div class="progress-bar" style="width:{p2w}%"></div>
           </div>
-          <span class="small fw-{'bold' if not is_local else 'normal'}" style="width:36px;text-align:right;color:{acc if not is_local else '#8A9BAC'}">{p2}%</span>
         </div>
-        <div class="text-end mt-2">
-          <span class="badge bg-light text-muted border" style="font-size:10px">+{margin}pts ventaja</span>
-        </div>
+        <div class="text-end mt-1" style="font-size:9px; opacity:0.5; letter-spacing:1px">+{margin} PTS VENTAXA</div>
       </div>
+
     </div>
   </div>
 </div>
@@ -529,47 +562,26 @@ def build(
     today  = datetime.now().strftime("%d de %B %Y").capitalize()
     avg_c  = stats.get("avg_confidence",0)
 
+    # Generamos el CSS de animaciones fuera del f-string para evitar conflictos con las llaves
+    anim_css = ""
+    for i in range(1, 22):
+        anim_css += f".card-match:nth-child({i}){{animation-delay:{i*0.04:.2f}s}}\n"
+
     doc = f"""<!DOCTYPE html>
 <html lang="es" data-bs-theme="light">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SportAnalysis · Top {len(top)} Picks</title>
+<title>SportAnalysis \u00b7 Top {len(top)} Picks</title>
 <link rel="icon" href="{_e(favicon)}"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="static/style.css">
 <style>
-  :root {{
-    --bs-body-bg:#F0F3F8;
-    --bs-body-font-family:'Inter',sans-serif;
-    --gold:#92720A;--gold-lt:#FBF5E0;
-  }}
-  body{{background:var(--bs-body-bg);-webkit-font-smoothing:antialiased}}
-  h1,h2,h3,h4,h5,.fw-black{{font-family:'Sora',sans-serif}}
-  .fw-black{{font-weight:900!important}}
-  .navbar-brand{{font-family:'Sora',sans-serif;font-weight:900}}
-  .card-match{{transition:all .18s ease;border-left-width:4px!important}}
-  .card-match:hover{{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1)!important}}
-  .tier-btn.active{{background:var(--gold-lt)!important;border-color:var(--gold)!important;color:var(--gold)!important;font-weight:600}}
-  .comp-chip.active{{background:var(--gold-lt)!important;border-color:var(--gold)!important;color:var(--gold)!important;font-weight:600}}
-  .badge.bg-warning{{color:#333!important}}
-  .progress{{border-radius:99px}}
-  .progress-bar{{border-radius:99px;transition:width .5s ease}}
-  .offcanvas-header{{background:#FAFBFD}}
-  @keyframes fadeUp{{from{{opacity:0;transform:translateY(10px)}}to{{opacity:1;transform:translateY(0)}}}}
-  .card-match{{animation:fadeUp .3s ease both}}
-  {chr(10).join(f'.card-match:nth-child({i}){{animation-delay:{i*0.04:.2f}s}}' for i in range(1,22))}
-  .hero-section{{background:linear-gradient(135deg,#FAFBFD 0%,#F0F5FF 100%);border-bottom:1px solid #DDE3EC}}
-  .navbar{{border-bottom:1px solid #DDE3EC;background:#fff!important}}
-  .offcanvas-body::-webkit-scrollbar{{width:4px}}
-  .offcanvas-body::-webkit-scrollbar-thumb{{background:#DDE3EC;border-radius:2px}}
-  @media(max-width:576px){{
-    .hero-section .display-5{{font-size:1.75rem}}
-    .modal-body .row.g-3 .col-4{{font-size:.9rem}}
-  }}
+{anim_css}
 </style>
 </head>
 <body>
@@ -588,7 +600,7 @@ def build(
         <h4 class="fw-black mb-2">{_e(creator_name)}</h4>
         <p class="text-muted small mb-4">
           Plataforma de análisis deportivo con scoring de confianza propio.<br>
-          Datos: pronosticosfutbol365.com · Club Elo · BetPlay
+          Datos: pronosticosfutbol365.com \u00b7 Club Elo \u00b7 BetPlay
         </p>
         <button type="button" class="btn btn-warning fw-bold px-4" data-bs-dismiss="modal" id="enterBtn">
           <i class="bi bi-play-fill me-1"></i>Ver análisis del día
@@ -599,7 +611,7 @@ def build(
 </div>
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+<nav class="navbar navbar-expand-lg sticky-top shadow-sm bg-white">
   <div class="container-xl">
     <a class="navbar-brand d-flex align-items-center gap-2" href="#">
       <div class="d-flex align-items-center justify-content-center rounded-2"
@@ -624,22 +636,6 @@ def build(
     </div>
   </div>
 </nav>
-<script>
-(function(){{
-  function updateClock(){{
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const col = new Date(utc + (-5 * 3600000));
-    const h = String(col.getHours()).padStart(2,'0');
-    const m = String(col.getMinutes()).padStart(2,'0');
-    const s = String(col.getSeconds()).padStart(2,'0');
-    const el = document.getElementById('live-clock');
-    if(el) el.textContent = h+':'+m+':'+s;
-  }}
-  updateClock();
-  setInterval(updateClock, 1000);
-}})();
-</script>
 
 <!-- AVISO LEGAL -->
 <div id="avisoLegal" style="
@@ -800,48 +796,13 @@ def build(
   </div>
 
   <footer class="d-flex justify-content-between flex-wrap gap-2 mt-4 pt-3 border-top small text-muted">
-    <span>© {datetime.now().year} <strong>DevOpsHB</strong> · Datos: pronosticosfutbol365.com · clubelo.com</span>
+    <span>© {datetime.now().year} <strong>DevOpsHB</strong> \u00b7 Datos: pronosticosfutbol365.com \u00b7 clubelo.com</span>
     <span><i class="bi bi-code-slash me-1"></i>Desarrollado por DevOpsHB</span>
   </footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-(function(){{
-  const KEY = 'sport_v5';
-  try {{
-    if (!localStorage.getItem(KEY)) {{
-      new bootstrap.Modal(document.getElementById('creatorModal')).show();
-    }}
-    document.getElementById('enterBtn').addEventListener('click', () => {{
-      try {{ localStorage.setItem(KEY,'1'); }} catch(_) {{}}
-    }});
-  }} catch(_) {{}}
-
-  const allCards = [...document.querySelectorAll('.card-match')];
-  let aT = 'ALL', aC = 'ALL';
-
-  function render() {{
-    let visible = 0;
-    allCards.forEach((c, i) => {{
-      const ok = (aT==='ALL' || c.dataset.tier===aT) && (aC==='ALL' || c.dataset.comp===aC);
-      c.style.display = ok ? '' : 'none';
-      if (ok) {{ c.style.animationDelay = (visible * 0.04) + 's'; visible++; }}
-    }});
-    document.getElementById('empty-state').classList.toggle('d-none', visible > 0);
-  }}
-
-  document.querySelectorAll('.tier-btn').forEach(b => b.addEventListener('click', () => {{
-    document.querySelectorAll('.tier-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active'); aT = b.dataset.t; render();
-  }}));
-
-  document.querySelectorAll('.comp-chip').forEach(b => b.addEventListener('click', () => {{
-    document.querySelectorAll('.comp-chip').forEach(x => x.classList.remove('active'));
-    b.classList.add('active'); aC = b.dataset.comp; render();
-  }}));
-}})();
-</script>
+<script src="static/script.js"></script>
 </body>
 </html>"""
     Path(output_path).write_text(doc, encoding="utf-8")

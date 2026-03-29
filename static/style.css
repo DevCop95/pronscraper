@@ -1,0 +1,130 @@
+:root {
+  --bs-body-bg: #fbfbfb;
+  --bs-body-font-family: 'Inter', sans-serif;
+  --premium-black: #0a0a0a;
+  --premium-gray: #666666;
+  --premium-border: rgba(0, 0, 0, 0.06);
+  --gold: #b8960c;
+  --gold-muted: rgba(184, 150, 12, 0.1);
+}
+
+body {
+  background-color: var(--bs-body-bg);
+  color: var(--premium-black);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, .fw-black {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* Emil Pattern: Minimalist Cards */
+.card-match {
+  background: #ffffff;
+  border: 1px solid var(--premium-border) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.card-match:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0,0,0,0.15) !important;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.04);
+}
+
+/* Side accent - much subtler */
+.card-match::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--premium-black);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card-match:hover::before {
+  opacity: 1;
+}
+
+/* Typography refinements */
+.text-muted {
+  color: var(--premium-gray) !important;
+  font-weight: 400;
+}
+
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.badge.bg-warning {
+  background-color: var(--gold-muted) !important;
+  color: var(--gold) !important;
+  border: 1px solid rgba(184, 150, 12, 0.2);
+}
+
+/* Progress bars - minimal style */
+.progress {
+  height: 4px !important;
+  background-color: #f0f0f0 !important;
+  border-radius: 10px;
+}
+
+.progress-bar {
+  background-color: var(--premium-black) !important;
+  border-radius: 10px;
+}
+
+/* Hero Section - Clean & High Contrast */
+.hero-section {
+  background: #fff;
+  border-bottom: 1px solid var(--premium-border);
+  padding: 80px 0 60px 0;
+}
+
+/* Modal/Offcanvas - Emil Style */
+.offcanvas {
+  border-left: 1px solid var(--premium-border) !important;
+  box-shadow: -20px 0 40px rgba(0,0,0,0.03);
+}
+
+.offcanvas-header {
+  background: #fff;
+  border-bottom: 1px solid var(--premium-border);
+}
+
+.offcanvas-body {
+  padding: 24px;
+}
+
+/* Animations */
+@keyframes emilFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-match {
+  animation: emilFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Specialized Badges */
+.badge-premium {
+  background: #000;
+  color: #fff;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}

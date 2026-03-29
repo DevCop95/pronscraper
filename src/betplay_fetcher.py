@@ -71,8 +71,17 @@ def fetch_football_events() -> list[dict]:
     return events            # ← siempre retorna la lista (vacía o no)
 
 
+def _clean(name: str) -> str:
+    """Limpia nombres de equipos para mejor matching."""
+    n = name.lower()
+    n = re.sub(r'\b(atletico|at\.|atl\.)\b', 'atl', n)
+    n = re.sub(r'\b(f\.c\.|fc)\b', '', n)
+    n = re.sub(r'\b(deportivo|dep\.)\b', 'dep', n)
+    n = re.sub(r'\s+', ' ', n).strip()
+    return n
+
 def _similarity(a: str, b: str) -> float:
-    return SequenceMatcher(None, a.lower().strip(), b.lower().strip()).ratio()
+    return SequenceMatcher(None, _clean(a), _clean(b)).ratio()
 
 
 def match_betplay_odds(prediction: dict, betplay_events: list[dict],
